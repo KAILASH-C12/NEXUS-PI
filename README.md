@@ -1,98 +1,151 @@
-# NEXUS-PI: AI-Powered Industrial Product Intelligence & Multimodal Swarm
+# ⚡ NEXUS-PI: Autonomous AI Industrial Product Intelligence
 
-> **Next-generation EXplainable Unified System for Industrial Product Intelligence**
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Next.js](https://img.shields.io/badge/Next.js-15.0+-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
+[![SQLite](https://img.shields.io/badge/Database-SQLite%203-003B57?style=flat&logo=sqlite&logoColor=white)](https://sqlite.org)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Transform raw part numbers, unstructured datasheets, and physical nameplate images into verified, structured, commerce-ready product intelligence backed by **4-Dimensional Confidence Vectors**, **3D Digital Twin Physics**, and **Cross-Vendor Pinout Bridges**.
+> **Next-generation EXplainable Unified System for Industrial Product Intelligence**  
+> Transform raw manufacturer part numbers, messy procurement spreadsheets, and OEM PDF datasheets into verified, structured, commerce-ready engineering dossiers backed by a **7-Agent Autonomous Swarm**, **4-Dimensional Trust Vectors**, **3D Digital Twin Physics**, and **Cross-Vendor Pinout Bridges**.
 
 ---
 
-## 🏗️ State-of-the-Art Python AI Engineering Stack
+## 🚀 Key Capabilities at a Glance
 
-NEXUS-PI is engineered on the modern AI production stack:
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 NEXUS-PI ARCHITECTURE                                  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+  [ Multimodal Ingestion ] ────► [ 7-Agent Autonomous Swarm ] ────► [ Verified Intelligence ]
+  • Part Number / MPN            1. Discovery (Web & PDF)           • 4D Trust Vector (0-100%)
+  • PDF Technical Datasheet      2. Analysis (SI Normalizer)        • eCl@ss & UNSPSC Taxonomy
+  • CSV / Excel Batch            3. Taxonomy (UNSPSC/eCl@ss)        • Interactive Pinout Bridge
+  • Gemini Vision Nameplate      4. Compliance (RoHS/REACH)         • 3D FEM Thermal Simulation
+  • Whisper Voice Dictation      5. Lifecycle (MTBF/Carbon)         • EU Digital Passport (DPP)
+                                 6. Validation (Claude Judge)       • SQLite DB & PDF Datasheet
+                                 7. Orchestrator (SSE Stream)
+```
 
-| Layer | Technology | Role & Capability |
+---
+
+## 🧭 Feature Matrix & Route Directory
+
+| Route | Feature Area | Description |
 | :--- | :--- | :--- |
-| **Structured Outputs** | **Pydantic AI & DSPy** | Strict mathematical schema enforcement & typed object generation |
-| **Model Gateway** | **OpenRouter** | Single unified API key for GPT-4o, Claude 3.7, DeepSeek-R1, LLaMA-3.3, and Qwen |
-| **Load Balancer** | **LiteLLM Router** | Automatic fallback tiers, TPM/RPM rate-limiting, and shuffle load-balancing |
-| **Web Discovery** | **Tavily AI Search & SerpAPI** | Deep programmatic web research with live OEM source URL attribution |
-| **Document Ingestion** | **Docling (MIT)** | Deep hierarchical PDF chunking, table extraction, and formula parsing |
-| **Vector Database** | **Qdrant** | Hybrid dense vector (1024-dim) + sparse BM25 semantic retrieval |
-| **Open-Source AI** | **Hugging Face & PyTorch** | `BAAI/bge-large-en-v1.5` embeddings & `DeepSeek-R1` reasoning proofs |
-| **Observability** | **Pydantic Logfire** | Structured LLM tracing, token cost accounting, and latency telemetry |
-| **Backend API** | **FastAPI + Uvicorn** | Asynchronous streaming SSE endpoints & Pydantic v2 validation |
-| **Frontend UI** | **Next.js 15 + Tailwind CSS v4** | Interactive WebGL/Canvas 3D physics shaders, glassmorphism, Framer Motion |
+| **`/`** | **Interactive Launchpad** | 1-click test presets (`Siemens`, `Schneider`, `Rockwell`, `ABB`, `Omron`), 3-step action hub, and animated explainer reel. |
+| **`/enrich`** | **Enrichment Studio** | Live 7-agent SSE execution stream, optical nameplate OCR, and real-time thought inspector. |
+| **`/history`** | **Product History DB** | Persistent SQLite database storing all enriched dossiers with search, filtering, and JSON export. |
+| **`/batch`** | **Batch CSV / Excel Pipeline** | Custom CSV/TSV/JSON file uploader with auto-column mapping (`part_number`, `brand`), concurrent processing, and ERP CSV export. |
+| **`/document-rag`** | **Real PDF Vector Ingestion** | Drag-and-drop OEM PDF datasheets parsed via `pypdf`, chunked with semantic similarity scoring and entity extraction. |
+| **`/results/[id]`** | **Product Intelligence Dossier** | Comprehensive engineering dossier with 4D trust radar, spec table, pinout terminal, ESG carbon, and 1-click printable PDF datasheet. |
+| **`/cross-vendor`** | **Cross-Vendor Pinout Bridge** | Discontinued/obsolete hardware replacement engine with physical terminal screw wiring maps and SCL ladder logic transpilation. |
+| **`/digital-twin`** | **3D AI Digital Twin** | Real-time FEM thermal heatmaps, Arrhenius degradation ($\lambda(t)$), MTBF failure curves, and live signal probing. |
+| **`/bom-optimizer`** | **BOM Swarm Optimizer** | Unstructured procurement spreadsheet parser with counterfeit detection and volume price cluster optimization. |
+| **`/dpp-passports`** | **EU DPP Passports** | EU ESPR 2026 compliant Digital Product Passports with QR codes, circularity index ($91\%$), and LCA carbon footprints. |
+| **`/compare`** | **Differential Matrix** | Side-by-side spec comparison of 2–4 industrial SKUs with AI architectural delta verdicts. |
+| **`/chat`** | **Engineering Copilot** | Multi-model industrial Copilot for cross-referencing datasheets, pinouts, and taxonomy codes. |
+| **`/dashboard`** | **Command Center** | Live platform analytics, 4D confidence radar, and brand distribution charts. |
+| **`/ai-mesh`** | **5-Model AI Mesh** | Multi-model benchmark suite (GPT-4o, Claude 3.7, DeepSeek-R1, Gemini 2.5, LLaMA-3.3). |
+| **`/agent-lab`** | **Agent Laboratory** | Isolated sandbox to test individual agents (Discovery, Analysis, Compliance, Lifecycle, Validation). |
+| **`/hitl-queue`** | **HITL Review Queue** | Human-in-the-Loop review queue for confidence threshold anomalies and discrepancy overrides. |
+| **`/business-case`** | **ROI Simulator** | Interactive financial calculator demonstrating annual savings ($184,000+) across catalog teams. |
+| **`/settings`** | **Model Settings** | LLM API configuration, provider fallback chains, and 4D confidence weight sliders. |
 
 ---
 
-## ⚡ Flagship AI Features
+## 🛠️ Technology Stack
 
-1. **3D AI Digital Twin & Multi-Physics Stress Simulator (`/digital-twin`)**:
-   - Real-time FEM thermal heatmaps on MCU core, buck regulator, and isolated optocouplers.
-   - Arrhenius actuarial failure rate calculations ($\lambda(t)$) and dynamic MTBF degradation curves.
-   - Interactive terminal pin voltage probing (`DI.0`, `DI.1`, `DO.0`, `PROFINET`) with live oscillograms.
+### Backend Engine
+- **Framework:** [FastAPI](https://fastapi.tiangolo.com/) with asynchronous SSE (`StreamingResponse`)
+- **Persistence:** SQLite 3 with WAL mode (`nexus_pi/database.py`)
+- **Document Extraction:** `pypdf` for technical datasheet parsing and table extraction
+- **Live Search:** `httpx` async web scraper & SerpAPI / Tavily integration
+- **AI Orchestration:** Multi-provider router (`OpenRouter`, `LiteLLM`, `OpenAI`, `Anthropic`, `Google Gemini`)
+- **Validation:** Pydantic v2 typed schema enforcement
 
-2. **Cross-Vendor Semantic Replacement & Pinout Bridge (`/cross-vendor`)**:
-   - Vector similarity & ontology matcher resolving obsolete/discontinued PLCs (Rockwell AB, Schneider, Omron $\rightarrow$ Siemens).
-   - Interactive physical terminal screw wiring bridges with safety alerts.
-   - Automated SCL / Ladder Logic code transpilation for TIA Portal.
-
-3. **Autonomous Industrial BOM & RFP Bulk Optimizer (`/bom-optimizer`)**:
-   - Multi-agent swarm parsing unstructured factory procurement spreadsheets.
-   - Automatic obsolescence mapping, counterfeit risk alerts, and bulk volume discount optimization.
-
-4. **EU Digital Product Passport (DPP) & ESG Generator (`/dpp-passports`)**:
-   - Official ESPR 2026 EU mandate compliant passports with dynamic QR codes.
-   - Cradle-to-gate LCA carbon footprint ($\text{kg CO}_2\text{e}$), circularity score ($91.0\%$), and SHA-256 provenance hashes.
-
-5. **Mobile-Ready Live Camera Shoot (Gemini 2.5 Flash Vision OCR)**:
-   - Live camera viewfinder with HUD optical bounding target and rear/front camera switcher.
-   - 1-click snapshot extraction for industrial nameplates, QR codes, and electrical ratings.
+### Frontend Application
+- **Framework:** [Next.js 15](https://nextjs.org/) (App Router, Turbopack, SSR/SSG)
+- **Styling:** Tailwind CSS with high-contrast industrial theme
+- **Animations:** Framer Motion & WebGL Canvas 3D physics shaders
+- **State Management:** Zustand with local & session persistence
+- **Responsiveness:** Full mobile layout with slide-over drawer navigation
 
 ---
 
-## 🚀 Quickstart Guide
+## ⚡ Quickstart Guide
 
-### 1. Backend (FastAPI Server)
+### Prerequisites
+- Python 3.11+
+- Node.js 18+ and npm
 
-```powershell
-# Activate virtual environment
+### 1. Backend Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/KAILASH-C12/NEXUS-PI.git
+cd NEXUS-PI
+
+# Create & activate virtual environment (Windows PowerShell)
+python -m venv venv
 .\venv\Scripts\activate
 
-# Install requirements
+# Install backend dependencies
 pip install -r requirements.txt
 
-# Run FastAPI Server on port 8000
+# Start the FastAPI server
 uvicorn nexus_pi.api.main:app --reload --port 8000
 ```
-👉 Interactive Swagger Docs: **`http://localhost:8000/docs`**
+- **Backend API:** `http://localhost:8000`
+- **Interactive Swagger Docs:** `http://localhost:8000/docs`
 
-### 2. Frontend (Next.js 15)
+### 2. Frontend Setup
 
-```powershell
+```bash
+# In a new terminal, navigate to frontend
 cd frontend
 
-# Start development server on port 3000
+# Install dependencies
+npm install
+
+# Start Next.js development server
 npm run dev
 ```
-👉 Web Application: **`http://localhost:3000`**
+- **Web Application:** `http://localhost:3000`
 
 ---
 
-## 🧭 Platform Routes
+## 📁 Repository Structure
 
-| Route | View | Description |
-|---|---|---|
-| `/` | **Guided Industrial Hubs** | Role-based navigation for Plant Maintenance, Sourcing, eCommerce, and AI Architects. |
-| `/digital-twin` | **3D Digital Twin** | Real-time FEM thermal heatmaps, Arrhenius degradation, and live signal probing. |
-| `/cross-vendor` | **Cross-Vendor Bridge** | Drop-in replacement finder with interactive terminal screw wiring bridges. |
-| `/bom-optimizer` | **BOM Swarm Optimizer** | Unstructured requisition parser with volume discount calculations. |
-| `/dpp-passports` | **EU DPP Passports** | ESPR 2026 compliant Digital Product Passports with dynamic QR codes. |
-| `/ai-mesh` | **5-Model AI Mesh** | Multi-model benchmark for GPT-4o, Gemini 2.5, Claude 3.7, Whisper, DALL-E, and HuggingFace. |
-| `/agent-lab` | **Agent Laboratory** | Isolated unit test sandboxes for Discovery, Analysis, Compliance, Lifecycle, and Validation. |
-| `/dashboard` | **Command Center** | Live telemetry, 4D confidence radar, score distribution histogram, and recent SKUs. |
-| `/enrich` | **Enrichment Studio** | Multimodal inputs (Text, Whisper Voice, Gemini Vision OCR) and live SSE progress. |
-| `/batch` | **Batch Processing** | CSV upload & queue processor with concurrent progress meters. |
-| `/compare` | **Differential Matrix** | Side-by-side spec comparison of 2-4 industrial SKUs with AI delta summary. |
-| `/chat` | **Copilot Studio** | Multi-model chat interface with transparent ontology reasoning traces. |
-| `/settings` | **Model Orchestration** | OpenRouter, Tavily, LiteLLM router proxy, and 4D weight calibration. |
+```
+NEXUS-PI/
+├── data/                      # SQLite persistence directory
+├── nexus_pi/                  # Core Python Backend Package
+│   ├── agents/                # 7-Agent Autonomous Swarm
+│   │   ├── discovery_agent.py # Web search & PDF retrieval
+│   │   ├── analysis_agent.py  # Spec extraction & SI normalization
+│   │   ├── taxonomy_agent.py  # UNSPSC & eCl@ss classifier
+│   │   ├── compliance_agent.py# RoHS, REACH, CE, UL auditor
+│   │   ├── lifecycle_agent.py # MTBF, carbon footprint, DPP generator
+│   │   ├── validation_agent.py# 4D confidence calculation & Claude judge
+│   │   └── orchestrator.py    # Pipeline coordinator & SSE streamer
+│   ├── api/                   # FastAPI Endpoints & WebSocket Routes
+│   │   └── main.py            # API routes, PDF upload, Batch execution
+│   ├── database.py            # SQLite database schema & queries
+│   └── config.py              # System configuration & API keys
+├── frontend/                  # Next.js 15 Frontend
+│   ├── src/
+│   │   ├── app/               # 21 App Router Pages
+│   │   ├── components/        # UI Components (RAG, DPP, Digital Twin, etc.)
+│   │   ├── lib/               # API Client, Types, and Mock Fallbacks
+│   │   └── stores/            # Zustand State Stores
+│   └── package.json           # Frontend dependencies
+└── requirements.txt           # Python backend dependencies
+```
+
+---
+
+## 📜 License
+
+Distributed under the **MIT License**. See `LICENSE` for details.
