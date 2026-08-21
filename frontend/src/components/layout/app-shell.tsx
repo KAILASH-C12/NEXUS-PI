@@ -16,20 +16,27 @@ import { useRouter } from "next/navigation";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [commandOpen, setCommandOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isVisionModalOpen, setIsVisionModalOpen, isVoiceModalOpen, setIsVoiceModalOpen } = useEnrichmentStore();
 
   return (
     <SmoothScroll>
-      <div className="relative min-h-screen flex w-full bg-[#ececee] text-[#111113] selection:bg-[#ff5500] selection:text-white">
+      <div className="relative min-h-screen flex w-full max-w-[100vw] overflow-x-hidden bg-[#ececee] text-[#111113] selection:bg-[#ff5500] selection:text-white">
         <ParticleBackground />
         
-        {/* Sidebar */}
-        <Sidebar />
+        {/* Sidebar (Desktop static + Mobile Drawer) */}
+        <Sidebar
+          mobileOpen={mobileMenuOpen}
+          onCloseMobile={() => setMobileMenuOpen(false)}
+        />
 
         {/* Main Content Area */}
-        <div className="relative flex-1 flex flex-col min-w-0 z-10">
-          <Navbar onOpenCommandPalette={() => setCommandOpen(true)} />
-          <main className="flex-1 flex flex-col p-6 md:p-8 max-w-7xl w-full mx-auto">
+        <div className="relative flex-1 flex flex-col min-w-0 z-10 w-full">
+          <Navbar
+            onOpenCommandPalette={() => setCommandOpen(true)}
+            onToggleMobileMenu={() => setMobileMenuOpen((prev) => !prev)}
+          />
+          <main className="flex-1 flex flex-col p-3 sm:p-6 md:p-8 max-w-7xl w-full mx-auto">
             <PageTransition>{children}</PageTransition>
           </main>
         </div>

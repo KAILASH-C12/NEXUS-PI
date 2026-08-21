@@ -42,7 +42,6 @@ export function StressSimulationControls({
 }: StressSimulationControlsProps) {
   // Arrhenius Acceleration Equation for Component Aging:
   // AF = exp((Ea / k) * (1/T_baseline - 1/T_actual))
-  // Where Ea ≈ 0.7 eV, k ≈ 8.617e-5 eV/K, T_baseline = 40°C (313.15 K)
   const tBaselineK = 313.15;
   const tActualK = Math.max(temperature + 273.15 + (load * 0.25), 248.15);
   const arrheniusAF = Math.exp((0.7 / 8.617e-5) * (1 / tBaselineK - 1 / tActualK));
@@ -58,43 +57,40 @@ export function StressSimulationControls({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-mono text-[#111113]">
       {/* Simulation Controls Header */}
-      <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-5 backdrop-blur-xl space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-5 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-[#d4d4d8] pb-3">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Cpu className="h-4 w-4 text-cyan-400" />
+            <h3 className="text-sm font-bold text-[#111113] flex items-center gap-2 uppercase">
+              <Cpu className="h-4 w-4 text-[#ff5500]" />
               <span>Multi-Physics Environmental Stress Engine</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-600 mt-0.5 font-semibold">
               Simulate harsh plant conditions and evaluate real-time Arrhenius component degradation
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
+            <button
               onClick={onReset}
-              className="h-8 text-xs border-white/10 text-slate-300 hover:bg-white/5"
+              className="h-8 px-3 text-xs font-bold border border-[#d4d4d8] bg-slate-50 text-slate-800 hover:border-[#ff5500] rounded-lg transition-all flex items-center gap-1"
             >
-              <RotateCcw className="h-3 w-3 mr-1" />
-              <span>Reset Nominal</span>
-            </Button>
+              <RotateCcw className="h-3 w-3" />
+              <span>Reset</span>
+            </button>
 
-            <Button
-              size="sm"
+            <button
               onClick={() => setIsSimulating(!isSimulating)}
-              className={`h-8 text-xs font-semibold rounded-lg shadow-md transition-all ${
+              className={`h-8 px-3 text-xs font-bold rounded-lg shadow-sm transition-all flex items-center gap-1 ${
                 isSimulating
-                  ? "bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20"
-                  : "bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-cyan-500/20"
+                  ? "bg-amber-500 hover:bg-amber-600 text-white"
+                  : "bg-[#ff5500] hover:bg-[#e04b00] text-white"
               }`}
             >
-              <Play className="h-3 w-3 mr-1" />
-              <span>{isSimulating ? "Pause Physics" : "Live Pulse Stream"}</span>
-            </Button>
+              <Play className="h-3 w-3" />
+              <span>{isSimulating ? "Pause Physics" : "Live Pulse"}</span>
+            </button>
           </div>
         </div>
 
@@ -102,14 +98,14 @@ export function StressSimulationControls({
         <div className="space-y-5 pt-2">
           {/* 1. Ambient Temperature */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-300 flex items-center gap-1.5">
-                <Thermometer className="h-3.5 w-3.5 text-pink-400" />
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-700 font-bold flex items-center gap-1.5">
+                <Thermometer className="h-3.5 w-3.5 text-red-600" />
                 Ambient Temperature:
               </span>
-              <span className={`font-bold ${temperature > 60 ? "text-red-400" : temperature > 45 ? "text-amber-400" : "text-cyan-300"}`}>
+              <span className={`font-extrabold ${temperature > 60 ? "text-red-600" : temperature > 45 ? "text-amber-600" : "text-emerald-700"}`}>
                 {temperature > 0 ? `+${temperature}` : temperature}°C
-                <span className="text-[10px] text-slate-500 font-sans ml-1">
+                <span className="text-[10px] text-slate-500 font-medium ml-1">
                   (Rated: -20°C to +60°C)
                 </span>
               </span>
@@ -126,15 +122,15 @@ export function StressSimulationControls({
 
           {/* 2. Compute / I/O Duty Cycle */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-300 flex items-center gap-1.5">
-                <Cpu className="h-3.5 w-3.5 text-cyan-400" />
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-700 font-bold flex items-center gap-1.5">
+                <Cpu className="h-3.5 w-3.5 text-indigo-600" />
                 Scan Cycle Load / Duty Cycle:
               </span>
-              <span className="text-cyan-300 font-bold">
+              <span className="text-indigo-700 font-extrabold">
                 {load}%
-                <span className="text-[10px] text-slate-500 font-sans ml-1">
-                  (Scan time: {(1.2 + (load * 0.08)).toFixed(1)} ms)
+                <span className="text-[10px] text-slate-500 font-medium ml-1">
+                  (Scan: {(1.2 + (load * 0.08)).toFixed(1)} ms)
                 </span>
               </span>
             </div>
@@ -150,14 +146,14 @@ export function StressSimulationControls({
 
           {/* 3. DC Power Rail Voltage */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-300 flex items-center gap-1.5">
-                <Zap className="h-3.5 w-3.5 text-amber-400" />
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-700 font-bold flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-amber-600" />
                 Supply Voltage Rail:
               </span>
-              <span className={`font-bold ${voltageRipple < 20.4 || voltageRipple > 28.8 ? "text-red-400" : "text-emerald-400"}`}>
+              <span className={`font-extrabold ${voltageRipple < 20.4 || voltageRipple > 28.8 ? "text-red-600" : "text-emerald-700"}`}>
                 {voltageRipple.toFixed(1)}V DC
-                <span className="text-[10px] text-slate-500 font-sans ml-1">
+                <span className="text-[10px] text-slate-500 font-medium ml-1">
                   (Tolerance: 20.4V - 28.8V)
                 </span>
               </span>
@@ -176,50 +172,50 @@ export function StressSimulationControls({
 
       {/* Actuarial MTBF & Reliability Projections */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-4 backdrop-blur-xl space-y-1">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">
+        <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-4 shadow-sm space-y-1">
+          <span className="text-[10px] uppercase text-slate-500 font-bold block">
             Degraded MTBF (Hours)
           </span>
-          <div className="text-2xl font-extrabold font-mono text-cyan-400">
+          <div className="text-2xl font-extrabold text-[#111113]">
             {adjustedMTBF.toLocaleString()} h
           </div>
-          <span className="text-[11px] text-slate-400 block">
+          <span className="text-[11px] text-slate-600 font-semibold block">
             ~{(adjustedMTBF / 8760).toFixed(1)} Years Continuous
           </span>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-4 backdrop-blur-xl space-y-1">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">
+        <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-4 shadow-sm space-y-1">
+          <span className="text-[10px] uppercase text-slate-500 font-bold block">
             10-Year Failure Risk
           </span>
-          <div className={`text-2xl font-extrabold font-mono ${failureProbability10Yr > 30 ? "text-red-400" : failureProbability10Yr > 15 ? "text-amber-400" : "text-emerald-400"}`}>
+          <div className={`text-2xl font-extrabold ${failureProbability10Yr > 30 ? "text-red-600" : failureProbability10Yr > 15 ? "text-amber-600" : "text-emerald-700"}`}>
             {failureProbability10Yr}%
           </div>
-          <span className="text-[11px] text-slate-400 block">
+          <span className="text-[11px] text-slate-600 font-semibold block">
             Arrhenius AF: {arrheniusAF.toFixed(2)}x
           </span>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-4 backdrop-blur-xl space-y-1">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">
+        <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-4 shadow-sm space-y-1">
+          <span className="text-[10px] uppercase text-slate-500 font-bold block">
             Health &amp; Stability Score
           </span>
-          <div className={`text-2xl font-extrabold font-mono ${healthScore < 60 ? "text-red-400" : healthScore < 80 ? "text-amber-400" : "text-emerald-400"}`}>
+          <div className={`text-2xl font-extrabold ${healthScore < 60 ? "text-red-600" : healthScore < 80 ? "text-amber-600" : "text-emerald-700"}`}>
             {healthScore}/100
           </div>
-          <span className="text-[11px] text-slate-400 block">
+          <span className="text-[11px] text-slate-600 font-semibold block">
             {healthScore > 80 ? "Nominal Factory Limits" : healthScore > 60 ? "Accelerated Wear Alert" : "CRITICAL SHUTDOWN RISK"}
           </span>
         </div>
       </div>
 
-      {/* AI Engineering Copilot Recommendation Banner */}
-      <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/20 p-4 backdrop-blur-xl space-y-2">
-        <div className="flex items-center gap-2 text-xs font-mono font-bold text-cyan-300">
-          <Sparkles className="h-4 w-4 text-cyan-400" />
+      {/* AI Engineering Insight */}
+      <div className="rounded-2xl border-2 border-[#111113] bg-white p-5 shadow-sm space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-[#111113] uppercase">
+          <Sparkles className="h-4 w-4 text-[#ff5500]" />
           <span>AI Reliability Engineer Insight (DeepSeek R1 + Actuarial Model)</span>
         </div>
-        <p className="text-xs text-slate-300 leading-relaxed">
+        <p className="text-xs text-slate-800 leading-relaxed font-semibold">
           {temperature > 60 || voltageRipple > 28.8
             ? `⚠️ CRITICAL STRESS: Operating at ${temperature}°C with ${voltageRipple}V exceeds OEM design envelope. Electrolytic capacitors in the buck regulator will experience dielectric breakdown ~${(arrheniusAF).toFixed(1)}x faster. Recommendation: Install enclosure vortex cooling and passive heatsink.`
             : `✅ NOMINAL CONDITIONS: Controller is operating well within IEC 61131-2 specifications. Optocoupler CTR degradation is minimal (<0.2%/yr). Estimated service life exceeds 14.5 years in 24/7 continuous automation cells.`}

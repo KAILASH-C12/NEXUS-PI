@@ -117,78 +117,75 @@ export default function DppPassportsPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-5xl mx-auto text-[#111113]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#d4d4d8] pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-white tracking-tight">
+            <span className="h-2 w-2 bg-[#ff5500] inline-block" />
+            <h1 className="text-2xl font-black font-mono text-[#111113] tracking-tight uppercase">
               EU Digital Product Passport (DPP) &amp; ESG Generator
             </h1>
-            <Badge variant="outline" className="text-xs font-mono text-emerald-400 border-emerald-500/30">
+            <Badge variant="outline" className="text-xs font-mono text-emerald-700 border-emerald-500/50 bg-emerald-50 font-bold">
               ESPR 2026 Mandate
             </Badge>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs font-mono text-slate-600 mt-1">
             Generate cryptographic, QR-verifiable Digital Product Passports with cradle-to-gate LCA and circularity scores
           </p>
         </div>
 
-        <Button
+        <button
           onClick={handleExportJsonLd}
-          variant="outline"
-          size="sm"
-          className="h-9 gap-1.5 border-white/10 text-slate-200 text-xs font-medium rounded-xl hover:border-cyan-500/40 hover:bg-white/[0.04]"
+          className="h-9 px-4 gap-1.5 border border-[#d4d4d8] bg-white text-slate-800 text-xs font-mono font-bold rounded-xl hover:border-[#ff5500] shadow-sm transition-all flex items-center"
         >
-          <FileDown className="h-3.5 w-3.5 text-cyan-400" />
+          <FileDown className="h-3.5 w-3.5 text-[#ff5500]" />
           <span>Export JSON-LD Passport</span>
-        </Button>
+        </button>
       </div>
 
       {/* Preset & Search Bar */}
-      <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-5 backdrop-blur-xl space-y-4">
+      <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-5 shadow-sm space-y-4 font-mono">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             Verified Passport Registry:
           </span>
           <div className="flex flex-wrap gap-2">
             {SAMPLE_PASSPORTS.map((p) => (
-              <Button
+              <button
                 key={p.passportId}
-                size="sm"
-                variant="outline"
                 onClick={() => setSelectedDpp(p)}
-                className={`h-8 text-xs rounded-xl border transition-all ${
+                className={`h-8 px-3 text-xs font-bold rounded-xl border transition-all ${
                   selectedDpp.passportId === p.passportId
-                    ? "bg-cyan-500/20 text-cyan-300 border-cyan-400 shadow-md shadow-cyan-500/20"
-                    : "border-white/10 text-slate-300 hover:bg-white/5"
+                    ? "bg-[#ff5500] text-white border-[#ff5500] shadow-md shadow-[#ff5500]/25"
+                    : "border-[#d4d4d8] bg-slate-50 text-slate-700 hover:border-[#ff5500]"
                 }`}
               >
                 <span>{p.partNumber}</span>
-              </Button>
+              </button>
             ))}
           </div>
         </div>
 
         {/* Generate Custom Bar */}
-        <div className="flex gap-2 pt-2 border-t border-white/5">
+        <div className="flex gap-2 pt-2 border-t border-[#d4d4d8]">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               value={searchPart}
               onChange={(e) => setSearchPart(e.target.value)}
               placeholder="Or enter any SKU part number to generate an EU DPP Passport..."
-              className="pl-10 h-10 text-xs bg-black/40 border-white/10 text-white rounded-xl focus:border-cyan-500/50"
+              className="pl-10 h-10 text-xs bg-slate-50 border-[#d4d4d8] text-[#111113] rounded-xl focus:border-[#ff5500]"
             />
           </div>
-          <Button
+          <button
             onClick={handleGenerateCustom}
             disabled={isGenerating}
-            className="h-10 px-5 gap-2 bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 text-white font-semibold text-xs rounded-xl shadow-md"
+            className="h-10 px-5 gap-2 bg-[#111113] hover:bg-[#222228] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center shrink-0"
           >
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="h-4 w-4 text-[#ff5500]" />
             <span>{isGenerating ? "Generating..." : "Generate Official DPP"}</span>
-          </Button>
+          </button>
         </div>
       </div>
 

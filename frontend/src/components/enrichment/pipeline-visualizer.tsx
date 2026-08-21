@@ -73,23 +73,23 @@ export function PipelineVisualizer({
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-5 backdrop-blur-xl shadow-xl space-y-5">
+    <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-5 shadow-sm space-y-5 font-mono text-[#111113]">
       {/* Header with progress */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#d4d4d8] pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#ff5500]/10 text-[#ff5500] border border-[#ff5500]/20">
             <Cpu className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-[#111113] flex items-center gap-2 uppercase">
               Autonomous Multi-Agent Pipeline
               {isStreaming && (
-                <span className="flex items-center gap-1 text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
                   <Loader2 className="h-2.5 w-2.5 animate-spin" /> LIVE
                 </span>
               )}
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-600">
               Coordinated LangGraph workflow across 4 specialized agents
             </p>
           </div>
@@ -97,13 +97,13 @@ export function PipelineVisualizer({
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="text-right">
-            <span className="text-xs font-mono font-bold text-cyan-300">
+            <span className="text-xs font-mono font-extrabold text-[#ff5500]">
               {progress}%
             </span>
-            <span className="text-[10px] text-slate-500 block">Completion</span>
+            <span className="text-[10px] text-slate-500 font-semibold block">Completion</span>
           </div>
           <div className="w-24 sm:w-32">
-            <Progress value={progress} className="h-2 bg-white/10" />
+            <Progress value={progress} className="h-2 bg-slate-200" />
           </div>
         </div>
       </div>
@@ -122,38 +122,38 @@ export function PipelineVisualizer({
               transition={{ delay: i * 0.08 }}
               className={`relative rounded-xl p-3.5 border transition-all ${
                 status === "active"
-                  ? "bg-cyan-950/40 border-cyan-400/60 shadow-lg shadow-cyan-500/10 ring-1 ring-cyan-400/30"
+                  ? "bg-[#ff5500]/5 border-[#ff5500] shadow-md ring-1 ring-[#ff5500]/30"
                   : status === "completed"
-                  ? "bg-white/[0.02] border-emerald-500/30 text-slate-200"
-                  : "bg-white/[0.01] border-white/5 opacity-50"
+                  ? "bg-emerald-50/50 border-emerald-300 text-slate-900"
+                  : "bg-slate-50 border-[#d4d4d8] opacity-60"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <div
                   className={`flex h-7 w-7 items-center justify-center rounded-lg ${
                     status === "active"
-                      ? "bg-cyan-500/20 text-cyan-300"
+                      ? "bg-[#ff5500]/20 text-[#ff5500]"
                       : status === "completed"
-                      ? "bg-emerald-500/10 text-emerald-400"
-                      : "bg-white/5 text-slate-500"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-slate-200 text-slate-500"
                   }`}
                 >
                   {status === "active" ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />
+                    <Loader2 className="h-4 w-4 animate-spin text-[#ff5500]" />
                   ) : status === "completed" ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    <CheckCircle2 className="h-4 w-4 text-emerald-700" />
                   ) : (
                     <Icon className="h-4 w-4" />
                   )}
                 </div>
-                <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-white/5 text-slate-400">
+                <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-white text-slate-600 border border-[#d4d4d8] font-bold">
                   {stage.model.split(" ")[0]}
                 </span>
               </div>
 
-              <h4 className="text-xs font-semibold text-white mb-0.5">{stage.title}</h4>
-              <p className="text-[11px] text-cyan-400/80 font-mono mb-1">{stage.agent}</p>
-              <p className="text-[10px] text-slate-400 leading-tight">{stage.desc}</p>
+              <h4 className="text-xs font-bold text-[#111113] mb-0.5">{stage.title}</h4>
+              <p className="text-[11px] text-[#ff5500] font-mono font-bold mb-1">{stage.agent}</p>
+              <p className="text-[10px] text-slate-600 font-semibold leading-tight">{stage.desc}</p>
             </motion.div>
           );
         })}
@@ -161,14 +161,14 @@ export function PipelineVisualizer({
 
       {/* Live Stream Event Log */}
       {events.length > 0 && (
-        <div className="rounded-xl bg-black/40 border border-white/5 p-3 font-mono text-[11px] space-y-1.5 max-h-32 overflow-y-auto">
-          <div className="text-[10px] uppercase text-slate-400 font-bold tracking-wider mb-1 flex items-center gap-1.5">
-            <Sparkles className="h-3 w-3 text-cyan-400" /> Pipeline Event Stream
+        <div className="rounded-xl bg-slate-900 border border-slate-700 p-3 font-mono text-[11px] space-y-1.5 max-h-32 overflow-y-auto shadow-inner">
+          <div className="text-[10px] uppercase text-[#ff5500] font-bold tracking-wider mb-1 flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3" /> Pipeline Event Stream
           </div>
           {events.map((ev, idx) => (
-            <div key={idx} className="flex items-start gap-2 text-slate-300">
-              <span className="text-cyan-400 shrink-0">[{ev.stage}]</span>
-              <span className="text-slate-400">{ev.message}</span>
+            <div key={idx} className="flex items-start gap-2 text-slate-200">
+              <span className="text-emerald-400 font-bold shrink-0">[{ev.stage}]</span>
+              <span className="text-slate-300">{ev.message}</span>
             </div>
           ))}
         </div>

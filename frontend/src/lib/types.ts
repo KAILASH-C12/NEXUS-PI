@@ -11,6 +11,7 @@ export interface ProvenanceRecord {
   source_name: string;
   source_url?: string;
   extracted_text?: string;
+  raw_snippet?: string;
   extraction_method: ExtractionMethod;
   timestamp: string;
   reliability_score: number;
@@ -96,6 +97,7 @@ export interface AIModelInfo {
   role: string;
   status: "online" | "simulated" | "offline";
   latency_ms: number;
+  success_rate?: number;
   context_window: string;
   capabilities: string[];
 }
@@ -122,4 +124,31 @@ export interface ChatMessage {
   reasoning_steps?: string[];
   references?: Array<{ title: string; type: string; url?: string }>;
   suggested_followups?: string[];
+}
+
+export interface DashboardStats {
+  total_products: number;
+  average_confidence: number;
+  review_required_count: number;
+  average_processing_time: number;
+  total_processing_time: number;
+  brand_distribution: Array<{ brand: string; count: number }>;
+  confidence_distribution: { high: number; medium: number; low: number };
+  recent_enrichments: Array<{
+    product_id: string;
+    part_number: string;
+    brand: string;
+    description: string;
+    overall_confidence: number;
+    processing_time_seconds: number;
+    created_at: string;
+  }>;
+}
+
+export interface ProductsListResponse {
+  products: ProductOutput[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
 }

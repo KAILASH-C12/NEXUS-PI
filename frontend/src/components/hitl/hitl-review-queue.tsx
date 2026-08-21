@@ -104,24 +104,24 @@ export function HitlReviewQueue() {
   const pendingCount = items.filter((i) => i.status === "PENDING").length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-mono text-[#111113]">
       {/* Overview Metric Banner */}
-      <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 p-5 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="rounded-2xl border-2 border-amber-300 bg-amber-50/70 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white shadow-sm">
             <ShieldAlert className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-white font-mono">
+            <h2 className="text-sm font-bold text-[#111113] uppercase">
               Human-In-The-Loop (HITL) Exception Queue
             </h2>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="text-xs text-slate-700 mt-0.5 font-semibold">
               Attributes with confidence below 70% or conflicting cross-reference citations require operational approval
             </p>
           </div>
         </div>
 
-        <Badge variant="outline" className="text-xs font-mono text-amber-400 border-amber-500/30">
+        <Badge variant="outline" className="text-xs font-mono text-amber-900 border-amber-400 bg-amber-100 font-bold">
           {pendingCount} Exceptions Pending Review
         </Badge>
       </div>
@@ -131,39 +131,39 @@ export function HitlReviewQueue() {
         {items.map((item) => (
           <div
             key={item.id}
-            className={`rounded-2xl border p-5 backdrop-blur-xl transition-all space-y-4 ${
+            className={`rounded-2xl border-2 p-5 transition-all space-y-4 shadow-sm ${
               item.status === "PENDING"
-                ? "bg-[#0c1222]/80 border-amber-500/30"
+                ? "bg-white border-amber-300"
                 : item.status === "APPROVED"
-                ? "bg-emerald-950/10 border-emerald-500/30 opacity-75"
+                ? "bg-emerald-50/50 border-emerald-300"
                 : item.status === "OVERRIDDEN"
-                ? "bg-cyan-950/10 border-cyan-500/30 opacity-75"
-                : "bg-red-950/10 border-red-500/30 opacity-60"
+                ? "bg-blue-50/50 border-blue-300"
+                : "bg-red-50/50 border-red-300 opacity-70"
             }`}
           >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#d4d4d8] pb-3">
               <div>
-                <span className="text-xs font-mono text-cyan-300 font-bold">
+                <span className="text-xs text-[#ff5500] font-bold">
                   {item.brand} {item.partNumber}
                 </span>
-                <h3 className="text-sm font-bold text-white font-mono mt-0.5">
-                  Attribute: <span className="text-amber-300">{item.attributeName}</span>
+                <h3 className="text-sm font-bold text-[#111113] mt-0.5">
+                  Attribute: <span className="text-amber-800">{item.attributeName}</span>
                 </h3>
               </div>
 
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[10px] font-mono text-amber-400 border-amber-500/30">
+                <Badge variant="outline" className="text-[10px] text-amber-900 border-amber-300 bg-amber-50 font-bold">
                   Confidence: {(item.confidence * 100).toFixed(0)}%
                 </Badge>
                 <Badge
-                  className={`text-[10px] font-mono font-bold ${
+                  className={`text-[10px] font-bold ${
                     item.status === "PENDING"
-                      ? "bg-amber-500 text-black"
+                      ? "bg-amber-500 text-white"
                       : item.status === "APPROVED"
-                      ? "bg-emerald-500 text-black"
+                      ? "bg-emerald-600 text-white"
                       : item.status === "OVERRIDDEN"
-                      ? "bg-cyan-500 text-black"
-                      : "bg-red-500 text-white"
+                      ? "bg-blue-600 text-white"
+                      : "bg-red-600 text-white"
                   }`}
                 >
                   {item.status}
@@ -173,66 +173,61 @@ export function HitlReviewQueue() {
 
             {/* Extracted vs Alternative Diff Box */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                <span className="text-slate-500 text-[10px] block uppercase">Extracted Value:</span>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 text-[10px] block uppercase font-bold">Extracted Value:</span>
                 {editingId === item.id ? (
                   <div className="flex items-center gap-2 mt-1">
                     <Input
                       value={overrideValue}
                       onChange={(e) => setOverrideValue(e.target.value)}
                       placeholder="Enter verified value..."
-                      className="h-8 text-xs bg-black border-cyan-500/50 text-white"
+                      className="h-8 text-xs bg-white border-[#ff5500] text-[#111113]"
                     />
                     <Button
                       size="sm"
                       onClick={() => handleOverride(item.id)}
-                      className="h-8 px-3 text-xs bg-cyan-500 hover:bg-cyan-400 text-black"
+                      className="h-8 px-3 text-xs bg-[#ff5500] hover:bg-[#e04b00] text-white font-bold"
                     >
                       Save
                     </Button>
                   </div>
                 ) : (
-                  <span className="text-white font-bold">{item.extractedValue}</span>
+                  <span className="text-[#111113] font-bold text-sm">{item.extractedValue}</span>
                 )}
               </div>
 
-              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1">
-                <span className="text-slate-500 text-[10px] block uppercase">AI Anomaly Reason:</span>
-                <span className="text-amber-200/90 text-[11px] block">{item.anomalyReason}</span>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 text-[10px] block uppercase font-bold">AI Anomaly Reason:</span>
+                <span className="text-amber-900 font-semibold text-[11px] block">{item.anomalyReason}</span>
               </div>
             </div>
 
             {/* Actions Bar */}
             {item.status === "PENDING" && (
               <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
-                <Button
-                  size="sm"
-                  variant="outline"
+                <button
                   onClick={() => {
                     setEditingId(item.id);
                     setOverrideValue(item.suggestedAlternative);
                   }}
-                  className="h-8 text-xs border-white/10 text-cyan-300 hover:bg-cyan-500/10"
+                  className="h-8 px-3 text-xs font-bold border border-[#d4d4d8] bg-white text-slate-800 hover:border-[#ff5500] rounded-lg transition-all flex items-center gap-1.5 shadow-xs"
                 >
-                  <Edit3 className="h-3 w-3 mr-1.5" /> Manual Override
-                </Button>
+                  <Edit3 className="h-3 w-3" /> Manual Override
+                </button>
 
-                <Button
-                  size="sm"
-                  variant="outline"
+                <button
                   onClick={() => handleReject(item.id)}
-                  className="h-8 text-xs border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  className="h-8 px-3 text-xs font-bold border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg transition-all flex items-center gap-1.5 shadow-xs"
                 >
-                  <XCircle className="h-3 w-3 mr-1.5" /> Reject Spec
-                </Button>
+                  <XCircle className="h-3 w-3" /> Reject Spec
+                </button>
 
-                <Button
-                  size="sm"
+                <button
                   onClick={() => handleApprove(item.id)}
-                  className="h-8 text-xs bg-emerald-500 hover:bg-emerald-400 text-black font-semibold"
+                  className="h-8 px-4 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all flex items-center gap-1.5 shadow-sm"
                 >
-                  <CheckCircle2 className="h-3 w-3 mr-1.5" /> Approve Extracted Spec
-                </Button>
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Approve Spec
+                </button>
               </div>
             )}
           </div>

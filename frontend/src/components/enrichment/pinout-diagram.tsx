@@ -40,41 +40,41 @@ export function PinoutDiagram({
   const getTypeColor = (type: string) => {
     switch (type) {
       case "POWER":
-        return "bg-red-500/10 text-red-400 border-red-500/20";
+        return "bg-red-100 text-red-800 border-red-300";
       case "DIGITAL_IN":
-        return "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+        return "bg-cyan-100 text-cyan-800 border-cyan-300";
       case "DIGITAL_OUT":
-        return "bg-indigo-500/10 text-indigo-400 border-indigo-500/20";
+        return "bg-indigo-100 text-indigo-800 border-indigo-300";
       case "ANALOG_IN":
-        return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+        return "bg-amber-100 text-amber-800 border-amber-300";
       case "COMM":
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-100 text-emerald-800 border-emerald-300";
       default:
-        return "bg-slate-500/10 text-slate-400 border-slate-500/20";
+        return "bg-slate-100 text-slate-800 border-slate-300";
     }
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-5 backdrop-blur-xl shadow-xl space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-5 shadow-sm space-y-4 font-mono text-[#111113]">
+      <div className="flex items-center justify-between border-b border-[#d4d4d8] pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
             <Zap className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Terminal Pinout &amp; Wiring Schematic</h3>
-            <p className="text-xs text-slate-400">Autonomous I/O terminal mapping synthesized from engineering pinout drawings</p>
+            <h3 className="text-sm font-bold text-[#111113] uppercase">Terminal Pinout &amp; Wiring Schematic</h3>
+            <p className="text-xs text-slate-600">Autonomous I/O terminal mapping synthesized from engineering pinout drawings</p>
           </div>
         </div>
-        <Badge variant="outline" className="text-xs font-mono text-cyan-400 border-cyan-500/30">
+        <Badge variant="outline" className="text-xs font-mono text-[#ff5500] border-[#ff5500]/40 bg-[#ff5500]/10 font-bold">
           Interactive Pinout
         </Badge>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Terminal Blocks Visual */}
-        <div className="lg:col-span-2 rounded-xl border border-white/5 bg-black/40 p-4 space-y-3">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">
+        <div className="lg:col-span-2 rounded-xl border border-[#d4d4d8] bg-slate-50 p-4 space-y-3">
+          <span className="text-[10px] uppercase text-slate-500 font-bold block">
             Click any terminal pin to inspect electrical limits:
           </span>
 
@@ -87,13 +87,13 @@ export function PinoutDiagram({
                   onClick={() => setSelectedPin(p)}
                   className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all ${
                     isSelected
-                      ? "bg-cyan-500/20 border-cyan-400 ring-2 ring-cyan-400/30 text-white"
-                      : "bg-white/[0.03] border-white/10 hover:border-cyan-500/40 text-slate-300"
+                      ? "bg-white border-[#ff5500] ring-2 ring-[#ff5500]/30 shadow-md text-[#111113]"
+                      : "bg-white border-[#d4d4d8] hover:border-slate-400 text-slate-700"
                   }`}
                 >
-                  <span className="text-[10px] font-mono text-slate-500">Pin {p.pin}</span>
-                  <span className="text-xs font-mono font-bold mt-0.5">{p.label}</span>
-                  <Badge variant="outline" className={`text-[8px] px-1 py-0 mt-1 uppercase ${getTypeColor(p.type)}`}>
+                  <span className="text-[10px] font-bold text-slate-500">Pin {p.pin}</span>
+                  <span className="text-xs font-extrabold text-[#111113] mt-0.5">{p.label}</span>
+                  <Badge variant="outline" className={`text-[8px] font-bold px-1.5 py-0 mt-1 uppercase ${getTypeColor(p.type)}`}>
                     {p.type.replace("_", " ")}
                   </Badge>
                 </button>
@@ -103,30 +103,30 @@ export function PinoutDiagram({
         </div>
 
         {/* Selected Pin Inspector */}
-        <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-cyan-300">
+        <div className="rounded-xl border-2 border-[#d4d4d8] bg-slate-50 p-4 space-y-3">
+          <div className="flex items-center justify-between border-b border-[#d4d4d8] pb-2">
+            <span className="text-xs font-bold text-[#ff5500]">
               Terminal Pin #{selectedPin.pin} Details
             </span>
-            <Badge variant="secondary" className="text-[10px] font-mono bg-cyan-500/20 text-cyan-300">
+            <Badge className="text-[10px] bg-slate-200 text-slate-800 font-bold">
               {selectedPin.label}
             </Badge>
           </div>
 
           <div className="space-y-2 text-xs font-mono">
-            <div className="bg-black/30 p-2.5 rounded-lg">
-              <span className="text-slate-500 text-[10px] block">Channel Type:</span>
-              <span className="text-white font-bold">{selectedPin.type}</span>
+            <div className="bg-white border border-[#d4d4d8] p-2.5 rounded-lg shadow-2xs">
+              <span className="text-slate-500 text-[10px] block uppercase font-bold">Channel Type:</span>
+              <span className="text-[#111113] font-extrabold">{selectedPin.type}</span>
             </div>
 
-            <div className="bg-black/30 p-2.5 rounded-lg">
-              <span className="text-slate-500 text-[10px] block">Voltage &amp; Current Limits:</span>
-              <span className="text-cyan-300 font-bold">{selectedPin.voltage}</span>
+            <div className="bg-white border border-[#d4d4d8] p-2.5 rounded-lg shadow-2xs">
+              <span className="text-slate-500 text-[10px] block uppercase font-bold">Voltage &amp; Current Limits:</span>
+              <span className="text-emerald-700 font-extrabold">{selectedPin.voltage}</span>
             </div>
 
-            <div className="bg-black/30 p-2.5 rounded-lg">
-              <span className="text-slate-500 text-[10px] block">Function &amp; Schematic Description:</span>
-              <p className="text-slate-200 font-sans text-xs mt-1 leading-relaxed">
+            <div className="bg-white border border-[#d4d4d8] p-2.5 rounded-lg shadow-2xs">
+              <span className="text-slate-500 text-[10px] block uppercase font-bold">Function &amp; Schematic Description:</span>
+              <p className="text-slate-800 font-sans text-xs mt-1 leading-relaxed font-semibold">
                 {selectedPin.description}
               </p>
             </div>

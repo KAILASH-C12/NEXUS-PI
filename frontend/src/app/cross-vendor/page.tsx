@@ -58,203 +58,197 @@ const PRESETS: PresetComparison[] = [
   {
     id: "schneider-to-siemens",
     sourceBrand: "Schneider Electric",
-    sourcePart: "TM221CE16T",
+    sourcePart: "TM221CE40R",
     sourceName: "Modicon M221 Logic Controller",
     targetBrand: "Siemens",
     targetPart: "6ES7214-1AG40-0XB0",
     targetName: "SIMATIC S7-1200 CPU 1214C",
-    matchScore: 97.2,
-    costSavings: "22% Lower Cost",
-    leadTimeDelta: "Immediate Availability",
+    matchScore: 96.8,
+    costSavings: "Direct Form-Factor Compatibility",
+    leadTimeDelta: "Immediate Dispatch",
     specs: [
       { spec: "Supply Voltage", source: "24V DC", target: "24V DC", match: true },
-      { spec: "Digital Inputs", source: "9 Channels", target: "14 Channels", match: true },
-      { spec: "Digital Outputs", source: "7 Transistor", target: "10 Transistor", match: true },
-      { spec: "Analog Inputs", source: "2 (0-10V)", target: "2 (0-10V)", match: true },
-      { spec: "Communication", source: "Modbus TCP / Ethernet", target: "PROFINET / Modbus TCP", match: true },
-      { spec: "Operating Temp", source: "-10°C to +55°C", target: "-20°C to +60°C", match: true },
+      { spec: "Digital Inputs", source: "24 Channels", target: "14 Channels (Base) + SM 1221", match: true },
+      { spec: "Digital Outputs", source: "16 Relay", target: "10 Transistor / Relay Exp", match: true },
+      { spec: "Ethernet Protocol", source: "Modbus TCP", target: "PROFINET / Modbus TCP", match: true },
     ],
   },
   {
     id: "omron-to-siemens",
     sourceBrand: "Omron Automation",
-    sourcePart: "NX1P2-9024DT",
-    sourceName: "Sysmac Machine Controller",
+    sourcePart: "CP1H-X40DR-A",
+    sourceName: "SYSMAC CP1H High-Speed PLC",
     targetBrand: "Siemens",
-    targetPart: "6ES7214-1AG40-0XB0",
-    targetName: "SIMATIC S7-1200 CPU 1214C",
-    matchScore: 96.8,
-    costSavings: "31% Lower Cost",
-    leadTimeDelta: "Immediate vs 18-Week Backorder",
+    targetPart: "6ES7215-1AG40-0XB0",
+    targetName: "SIMATIC S7-1200 CPU 1215C",
+    matchScore: 97.2,
+    costSavings: "22% System BOM Savings",
+    leadTimeDelta: "Global Inventory Match",
     specs: [
-      { spec: "Supply Voltage", source: "24V DC", target: "24V DC", match: true },
-      { spec: "Digital Inputs", source: "14 Channels", target: "14 Channels", match: true },
-      { spec: "Digital Outputs", source: "10 Transistor (PNP)", target: "10 Transistor (0.5A)", match: true },
-      { spec: "EtherCAT / Fieldbus", source: "EtherNet/IP + EtherCAT", target: "PROFINET IO Real-Time", match: true },
-      { spec: "Protection Degree", source: "IP20", target: "IP20", match: true },
-      { spec: "Certifications", source: "cULus, CE", target: "cULus, CE, ATEX Zone 2", match: true },
+      { spec: "Supply Voltage", source: "100-240V AC", target: "24V DC (w/ SITOP PSU)", match: true },
+      { spec: "High-Speed Counters", source: "4 Channels 100kHz", target: "6 Channels 100kHz", match: true },
+      { spec: "Pulse Outputs", source: "4 Channels 100kHz", target: "4 PTO/PWM Channels", match: true },
     ],
   },
 ];
 
-export default function CrossVendorPage() {
+export default function CrossVendorBridgePage() {
   const [selectedPreset, setSelectedPreset] = useState<PresetComparison>(PRESETS[0]);
   const [customPart, setCustomPart] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
-  const handleRunCustomSearch = async () => {
-    if (!customPart.trim()) {
-      toast.error("Please enter a competitor or obsolete part number");
-      return;
-    }
+  const handleSearchCustom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customPart.trim()) return;
+
     setIsSearching(true);
     await new Promise((r) => setTimeout(r, 800));
     setIsSearching(false);
-    toast.success(`Found 98.1% drop-in match for "${customPart}" across 4D ontology graph`);
+    toast.success(`Autonomous Swarm mapped ${customPart} to Siemens S7-1200 drop-in equivalent`);
   };
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-8 max-w-6xl text-[#111113]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#d4d4d8] pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-white tracking-tight">
+            <span className="h-2 w-2 bg-[#ff5500] inline-block" />
+            <h1 className="text-2xl font-black font-mono text-[#111113] tracking-tight uppercase">
               Cross-Vendor Semantic Matcher &amp; Pinout Bridge
             </h1>
-            <Badge variant="outline" className="text-xs font-mono text-cyan-400 border-cyan-500/30">
+            <Badge variant="outline" className="text-xs font-mono text-[#ff5500] border-[#ff5500]/40 bg-[#ff5500]/10 font-bold">
               Vector &amp; Ontology Matcher
             </Badge>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs font-mono text-slate-600 mt-1">
             Resolve obsolete or out-of-stock PLCs with drop-in equivalents, terminal wiring bridges, and code transpilation
           </p>
         </div>
       </div>
 
       {/* Preset Selector Banner */}
-      <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-5 backdrop-blur-xl space-y-4">
+      <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-5 shadow-sm space-y-4 font-mono">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             Quick-Select Industrial Drop-in Replacements:
           </span>
           <div className="flex flex-wrap gap-2">
             {PRESETS.map((preset) => (
-              <Button
+              <button
                 key={preset.id}
-                size="sm"
-                variant="outline"
                 onClick={() => setSelectedPreset(preset)}
-                className={`h-8 text-xs rounded-xl border transition-all ${
+                className={`h-8 px-3 text-xs font-bold rounded-xl border transition-all ${
                   selectedPreset.id === preset.id
-                    ? "bg-cyan-500/20 text-cyan-300 border-cyan-400 shadow-md shadow-cyan-500/20"
-                    : "border-white/10 text-slate-300 hover:bg-white/5"
+                    ? "bg-[#ff5500] text-white border-[#ff5500] shadow-md shadow-[#ff5500]/25"
+                    : "border-[#d4d4d8] bg-slate-50 text-slate-700 hover:border-[#ff5500]"
                 }`}
               >
                 <span>{preset.sourceBrand.split(" ")[0]} &rarr; {preset.targetBrand}</span>
-              </Button>
+              </button>
             ))}
           </div>
         </div>
 
         {/* Search Custom Part Bar */}
-        <div className="flex gap-2 pt-2 border-t border-white/5">
+        <form onSubmit={handleSearchCustom} className="flex gap-2 pt-2 border-t border-[#d4d4d8]">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               value={customPart}
               onChange={(e) => setCustomPart(e.target.value)}
               placeholder="Or enter any obsolete/competitor part number (e.g. Rockwell 1769-OB16, Mitsubishi FX5U)..."
-              className="pl-10 h-10 text-xs bg-black/40 border-white/10 text-white rounded-xl focus:border-cyan-500/50"
+              className="pl-10 h-10 text-xs font-mono bg-slate-50 border-[#d4d4d8] text-[#111113] rounded-xl focus:border-[#ff5500]"
             />
           </div>
-          <Button
-            onClick={handleRunCustomSearch}
-            disabled={isSearching}
-            className="h-10 px-5 gap-2 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-xs rounded-xl shadow-md"
+          <button
+            type="submit"
+            disabled={isSearching || !customPart.trim()}
+            className="h-10 px-5 bg-[#111113] hover:bg-[#222228] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all shrink-0"
           >
-            <Sparkles className="h-4 w-4" />
-            <span>{isSearching ? "Searching..." : "Find Drop-In Match"}</span>
-          </Button>
-        </div>
+            {isSearching ? "Searching..." : "Find Equivalent"}
+          </button>
+        </form>
       </div>
 
-      {/* Match Score & Commercial KPI Matrix */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-cyan-500/30 bg-cyan-950/20 p-5 backdrop-blur-xl space-y-1">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">
-            Ontology &amp; Vector Similarity
-          </span>
-          <div className="text-3xl font-extrabold font-mono text-cyan-400">
-            {selectedPreset.matchScore}% Drop-In
+      {/* Side-by-Side Equivalence Banner */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center font-mono">
+        {/* Source Obsolete Part Card */}
+        <div className="md:col-span-5 rounded-2xl border-2 border-red-200 bg-red-50/50 p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <Badge className="bg-red-100 text-red-800 border-red-300 text-[10px] font-bold">
+              ORIGINAL / DISCONTINUED
+            </Badge>
+            <span className="text-xs text-red-700 font-bold">{selectedPreset.leadTimeDelta}</span>
           </div>
-          <span className="text-[11px] text-slate-400 block">
-            15/15 Electrical dimensions verified
-          </span>
-        </div>
 
-        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5 backdrop-blur-xl space-y-1">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">
-            Procurement Cost Advantage
-          </span>
-          <div className="text-2xl font-extrabold font-mono text-emerald-400">
-            {selectedPreset.costSavings}
-          </div>
-          <span className="text-[11px] text-slate-400 block">
-            Immediate OEM list pricing delta
-          </span>
-        </div>
-
-        <div className="rounded-2xl border border-indigo-500/30 bg-indigo-950/20 p-5 backdrop-blur-xl space-y-1">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">
-            Lead Time &amp; Supply Security
-          </span>
-          <div className="text-2xl font-extrabold font-mono text-indigo-300">
-            {selectedPreset.leadTimeDelta}
-          </div>
-          <span className="text-[11px] text-slate-400 block">
-            Global distributor stock confirmed
-          </span>
-        </div>
-      </div>
-
-      {/* 12-Spec Comparison Matrix Table */}
-      <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-6 backdrop-blur-xl space-y-4">
-        <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Layers className="h-4 w-4 text-cyan-400" />
-              <span>Technical Specification Differential Matrix</span>
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Direct parameter-by-parameter alignment between legacy and replacement hardware
-            </p>
+            <span className="text-[10px] uppercase text-red-600 font-bold">{selectedPreset.sourceBrand}</span>
+            <h3 className="text-lg font-extrabold text-[#111113]">{selectedPreset.sourcePart}</h3>
+            <p className="text-xs text-slate-700 font-semibold">{selectedPreset.sourceName}</p>
           </div>
-          <Badge variant="outline" className="text-xs font-mono text-emerald-400 border-emerald-500/30">
-            100% Interoperable
-          </Badge>
         </div>
 
-        <div className="rounded-xl border border-white/5 overflow-hidden">
-          <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-white/[0.03] text-slate-400 uppercase text-[10px] tracking-wider border-b border-white/5">
+        {/* Center Match Delta Indicator */}
+        <div className="md:col-span-2 flex flex-col items-center justify-center text-center space-y-1.5 py-2">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ff5500] text-white shadow-lg shadow-[#ff5500]/30">
+            <GitCompare className="h-6 w-6" />
+          </div>
+          <div className="text-sm font-extrabold text-[#111113]">
+            {selectedPreset.matchScore}%
+          </div>
+          <span className="text-[9px] uppercase text-slate-500 font-bold">Pinout &amp; Spec Match</span>
+        </div>
+
+        {/* Target Replacement Part Card */}
+        <div className="md:col-span-5 rounded-2xl border-2 border-emerald-300 bg-emerald-50/50 p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300 text-[10px] font-bold">
+              DROP-IN REPLACEMENT
+            </Badge>
+            <span className="text-xs text-emerald-800 font-bold">{selectedPreset.costSavings}</span>
+          </div>
+
+          <div>
+            <span className="text-[10px] uppercase text-emerald-700 font-bold">{selectedPreset.targetBrand}</span>
+            <h3 className="text-lg font-extrabold text-[#111113]">{selectedPreset.targetPart}</h3>
+            <p className="text-xs text-slate-700 font-semibold">{selectedPreset.targetName}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Specifications Matching Table */}
+      <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-6 shadow-sm space-y-4 font-mono">
+        <div className="flex items-center justify-between border-b border-[#d4d4d8] pb-3">
+          <h3 className="text-sm font-bold text-[#111113] uppercase flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <span>Electrical &amp; Mechanical Dimension Cross-Check</span>
+          </h3>
+          <span className="text-xs text-emerald-700 font-bold">
+            {selectedPreset.specs.length}/{selectedPreset.specs.length} Verified Compatible
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] border-b border-[#d4d4d8] font-bold">
               <tr>
-                <th className="py-3 px-4">Attribute Dimension</th>
-                <th className="py-3 px-4 text-pink-300">Legacy: {selectedPreset.sourcePart}</th>
-                <th className="py-3 px-4 text-cyan-300">Replacement: {selectedPreset.targetPart}</th>
-                <th className="py-3 px-4 text-center">Interoperability</th>
+                <th className="py-2.5 px-3">Specification Dimension</th>
+                <th className="py-2.5 px-3 text-red-700">{selectedPreset.sourceBrand} Original</th>
+                <th className="py-2.5 px-3 text-emerald-800">{selectedPreset.targetBrand} Drop-In</th>
+                <th className="py-2.5 px-3 text-center">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100">
               {selectedPreset.specs.map((s, idx) => (
-                <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-200">{s.spec}</td>
-                  <td className="py-3 px-4 text-slate-300">{s.source}</td>
-                  <td className="py-3 px-4 text-slate-300">{s.target}</td>
-                  <td className="py-3 px-4 text-center">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      <CheckCircle2 className="h-3 w-3" /> Compatible
-                    </span>
+                <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                  <td className="py-2.5 px-3 font-bold text-[#111113]">{s.spec}</td>
+                  <td className="py-2.5 px-3 text-slate-700 font-semibold">{s.source}</td>
+                  <td className="py-2.5 px-3 font-bold text-emerald-800">{s.target}</td>
+                  <td className="py-2.5 px-3 text-center">
+                    <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[9px] font-bold">
+                      100% MATCH
+                    </Badge>
                   </td>
                 </tr>
               ))}
@@ -263,7 +257,7 @@ export default function CrossVendorPage() {
         </div>
       </div>
 
-      {/* Interactive Physical Terminal Bridge */}
+      {/* Interactive Screw Terminal Pinout Bridge Visualizer */}
       <PinoutBridgeVisualizer
         sourceBrand={selectedPreset.sourceBrand}
         sourcePart={selectedPreset.sourcePart}

@@ -83,39 +83,39 @@ END_FUNCTION_BLOCK`;
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-mono text-[#111113]">
       {/* Visual Terminal Bridge Comparison */}
-      <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-6 backdrop-blur-xl space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+      <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-6 shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d4d4d8] pb-4">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Zap className="h-4 w-4 text-cyan-400" />
+            <h3 className="text-sm font-bold text-[#111113] flex items-center gap-2 uppercase">
+              <Zap className="h-4 w-4 text-[#ff5500]" />
               <span>Interactive Physical Terminal Wiring Bridge</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-600 mt-0.5">
               Click any pin row to inspect voltage levels, galvanic isolation requirements, and interposing circuitry
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs font-mono text-emerald-400 border-emerald-500/30">
+            <Badge variant="outline" className="text-xs font-mono text-emerald-800 border-emerald-300 bg-emerald-50 font-bold">
               6 Direct 1:1 Pins
             </Badge>
-            <Badge variant="outline" className="text-xs font-mono text-amber-400 border-amber-500/30">
+            <Badge variant="outline" className="text-xs font-mono text-amber-800 border-amber-300 bg-amber-50 font-bold">
               2 Interposing Relays
             </Badge>
           </div>
         </div>
 
         {/* Side by Side Terminal Headers */}
-        <div className="grid grid-cols-12 gap-3 text-xs font-mono uppercase font-bold text-slate-400 border-b border-white/5 pb-2">
-          <div className="col-span-5 text-pink-300">
+        <div className="grid grid-cols-12 gap-3 text-xs font-mono uppercase font-bold text-slate-600 border-b border-[#d4d4d8] pb-2">
+          <div className="col-span-5 text-red-700 font-bold">
             Source: {sourceBrand} ({sourcePart})
           </div>
-          <div className="col-span-2 text-center text-slate-500">
-            Bridge
+          <div className="col-span-2 text-center text-slate-400 font-bold">
+            Wiring Map
           </div>
-          <div className="col-span-5 text-right text-cyan-300">
+          <div className="col-span-5 text-right text-emerald-800 font-bold">
             Target: {targetBrand} ({targetPart})
           </div>
         </div>
@@ -128,32 +128,32 @@ END_FUNCTION_BLOCK`;
               <div
                 key={idx}
                 onClick={() => setSelectedPin(pin)}
-                className={`grid grid-cols-12 gap-3 items-center p-3 rounded-xl border text-xs font-mono cursor-pointer transition-all ${
+                className={`grid grid-cols-12 gap-3 items-center p-3 rounded-xl border-2 text-xs font-mono cursor-pointer transition-all ${
                   isSelected
-                    ? "bg-cyan-500/10 border-cyan-400 shadow-md shadow-cyan-500/20"
-                    : "bg-white/[0.02] border-white/5 hover:border-white/20 hover:bg-white/[0.04]"
+                    ? "bg-[#ff5500]/10 border-[#ff5500] shadow-sm font-bold"
+                    : "bg-slate-50 border-[#d4d4d8] hover:border-slate-400"
                 }`}
               >
                 {/* Source Pin */}
                 <div className="col-span-5 flex items-center gap-2 overflow-hidden">
-                  <span className="px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-400 border border-pink-500/20 font-bold shrink-0">
+                  <span className="px-2 py-0.5 rounded-md bg-red-100 text-red-800 border border-red-200 font-bold shrink-0">
                     {pin.sourcePin}
                   </span>
-                  <span className="truncate text-slate-300 font-sans">{pin.sourceFunction}</span>
+                  <span className="truncate text-slate-800 font-semibold">{pin.sourceFunction}</span>
                 </div>
 
                 {/* Bridge Arrow */}
                 <div className="col-span-2 flex justify-center">
                   <div className="flex items-center gap-1">
-                    <div className="h-0.5 w-6 bg-cyan-400/40" />
-                    <ArrowRight className="h-3 w-3 text-cyan-400 shrink-0" />
+                    <div className="h-0.5 w-6 bg-[#ff5500]" />
+                    <ArrowRight className="h-3.5 w-3.5 text-[#ff5500] shrink-0 font-bold" />
                   </div>
                 </div>
 
                 {/* Target Pin */}
                 <div className="col-span-5 flex items-center justify-end gap-2 overflow-hidden">
-                  <span className="truncate text-slate-300 font-sans text-right">{pin.targetFunction}</span>
-                  <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold shrink-0">
+                  <span className="truncate text-slate-800 font-semibold text-right">{pin.targetFunction}</span>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold shrink-0">
                     {pin.targetPin}
                   </span>
                 </div>
@@ -164,28 +164,28 @@ END_FUNCTION_BLOCK`;
 
         {/* Selected Pin Deep-Dive Details */}
         {selectedPin && (
-          <div className="rounded-xl bg-black/60 border border-cyan-500/30 p-4 font-mono text-xs space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-cyan-300 font-bold flex items-center gap-1.5">
+          <div className="rounded-xl bg-slate-900 border border-slate-700 p-4 font-mono text-xs space-y-2 text-white shadow-md">
+            <div className="flex items-center justify-between border-b border-slate-700 pb-2">
+              <span className="text-[#ff5500] font-bold flex items-center gap-1.5">
                 {selectedPin.status === "DIRECT_MATCH" ? (
                   <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 ) : (
                   <AlertTriangle className="h-4 w-4 text-amber-400" />
                 )}
-                Wiring Protocol &amp; Engineering Guideline
+                Wiring Protocol &amp; Engineering Guideline: {selectedPin.sourcePin} &rarr; {selectedPin.targetPin}
               </span>
               <Badge
                 variant="outline"
-                className={`text-[10px] ${
+                className={`text-[10px] font-bold ${
                   selectedPin.status === "DIRECT_MATCH"
-                    ? "text-emerald-400 border-emerald-500/30"
-                    : "text-amber-400 border-amber-500/30"
+                    ? "text-emerald-400 border-emerald-500/50 bg-emerald-950/40"
+                    : "text-amber-400 border-amber-500/50 bg-amber-950/40"
                 }`}
               >
                 {selectedPin.status}
               </Badge>
             </div>
-            <p className="text-slate-300 leading-relaxed font-sans text-xs">
+            <p className="text-slate-200 leading-relaxed text-xs font-medium">
               {selectedPin.note}
             </p>
           </div>
@@ -193,31 +193,29 @@ END_FUNCTION_BLOCK`;
       </div>
 
       {/* SCL / IEC 61131-3 Code Transpiler Box */}
-      <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-5 backdrop-blur-xl space-y-3">
-        <div className="flex items-center justify-between">
+      <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-5 shadow-sm space-y-3 font-mono">
+        <div className="flex items-center justify-between border-b border-[#d4d4d8] pb-3">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Code2 className="h-4 w-4 text-cyan-400" />
+            <h3 className="text-sm font-bold text-[#111113] flex items-center gap-2 uppercase">
+              <Code2 className="h-4 w-4 text-[#ff5500]" />
               <span>Automated PLC Ladder / SCL Transpiler</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-600 mt-0.5">
               Auto-transpiled Siemens TIA Portal Structured Control Language (SCL) equivalent
             </p>
           </div>
 
-          <Button
-            size="sm"
-            variant="outline"
+          <button
             onClick={copySCL}
-            className="h-7 text-xs border-white/10 text-slate-300 hover:bg-white/5"
+            className="h-8 px-3 text-xs font-bold border border-[#d4d4d8] bg-slate-50 text-slate-800 hover:border-[#ff5500] hover:text-[#ff5500] rounded-lg transition-all flex items-center gap-1"
           >
-            {copiedCode ? <Check className="h-3 w-3 text-emerald-400 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
+            {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-600 mr-1" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
             <span>Copy SCL Block</span>
-          </Button>
+          </button>
         </div>
 
-        <div className="rounded-xl bg-black/60 border border-white/5 p-4 font-mono text-xs overflow-x-auto">
-          <pre className="text-emerald-300 leading-relaxed">{sampleSCL}</pre>
+        <div className="rounded-xl bg-slate-900 border border-slate-700 p-4 font-mono text-xs overflow-x-auto text-emerald-400">
+          <pre className="leading-relaxed">{sampleSCL}</pre>
         </div>
       </div>
     </div>

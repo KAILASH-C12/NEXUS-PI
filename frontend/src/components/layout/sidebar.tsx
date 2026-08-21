@@ -19,6 +19,8 @@ import {
   Database,
   Box,
   ShieldCheck,
+  History,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 import { useEnrichmentStore } from "@/stores/enrichment-store";
@@ -28,6 +30,7 @@ const PRIMARY_NAV = [
   { name: "Overview", href: "/", icon: Sparkles },
   { name: "Command Center", href: "/dashboard", icon: LayoutDashboard },
   { name: "Enrichment Studio", href: "/enrich", icon: Cpu, badge: "Live" },
+  { name: "Product History", href: "/history", icon: History, badge: "DB" },
   { name: "Batch Pipeline", href: "/batch", icon: Layers },
   { name: "Differential Matrix", href: "/compare", icon: GitCompare },
   { name: "AI Copilot", href: "/chat", icon: MessageSquareCode },
@@ -50,34 +53,34 @@ const INTELLIGENCE_NAV = [
   { name: "Model Settings", href: "/settings", icon: Settings },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const { history, activeProduct, setActiveProduct } = useEnrichmentStore();
 
-  return (
-    <aside
-      className={`relative z-20 flex flex-col border-r border-[#d4d4d8] bg-[#f8f8fa] text-[#111113] backdrop-blur-2xl transition-all duration-300 ${
-        collapsed ? "w-16 sm:w-18" : "w-64"
-      }`}
-    >
+  const renderNavContent = (isMobile: boolean) => (
+    <>
       {/* Brand Header */}
       <div
         className={`flex h-16 items-center border-b border-[#d4d4d8] bg-white/60 transition-all ${
-          collapsed ? "justify-center px-2" : "justify-between px-4"
+          !isMobile && collapsed ? "justify-center px-2" : "justify-between px-4"
         }`}
       >
         <Link
           href="/"
+          onClick={isMobile ? onCloseMobile : undefined}
           className="flex items-center gap-3 overflow-hidden shrink-0"
           title="NEXUS LABS"
         >
-          {/* ChainGPT Labs style Robot Head Icon */}
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white border-2 border-[#111113] shadow-sm relative overflow-hidden">
             <div className="absolute inset-0 border border-[#ff5500] rounded-lg m-0.5" />
             <span className="font-mono text-xs font-black text-[#111113] z-10">[•_•]</span>
           </div>
-          {!collapsed && (
+          {(isMobile || !collapsed) && (
             <div className="flex flex-col">
               <span className="font-extrabold text-sm font-mono tracking-wider text-[#111113] flex items-center gap-1">
                 NEXUS <span className="text-[#ff5500]">LABS</span>
@@ -89,19 +92,29 @@ export function Sidebar() {
           )}
         </Link>
 
-        {!collapsed && (
+        {isMobile ? (
           <button
-            onClick={() => setCollapsed(true)}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200/60 hover:text-[#111113] transition-colors shrink-0"
-            title="Collapse sidebar"
+            onClick={onCloseMobile}
+            className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-200/60 hover:text-[#111113] transition-colors"
+            title="Close menu"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
+        ) : (
+          !collapsed && (
+            <button
+              onClick={() => setCollapsed(true)}
+              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200/60 hover:text-[#111113] transition-colors shrink-0"
+              title="Collapse sidebar"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )
         )}
       </div>
 
-      {/* Dedicated Expand Button Strip when Collapsed */}
-      {collapsed && (
+      {/* Expand button strip when desktop collapsed */}
+      {!isMobile && collapsed && (
         <div className="flex justify-center py-1.5 border-b border-[#d4d4d8] bg-slate-100/60">
           <button
             onClick={() => setCollapsed(false)}
@@ -113,11 +126,11 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* Main Navigation */}
-      <div className={`flex-1 overflow-y-auto py-4 space-y-6 ${collapsed ? "px-2" : "px-3"}`}>
+      {/* Navigation Links */}
+      <div className={`flex-1 overflow-y-auto py-4 space-y-6 ${!isMobile && collapsed ? "px-2" : "px-3"}`}>
         {/* Core Workspace Section */}
         <div className="space-y-1">
-          {!collapsed && (
+          {(isMobile || !collapsed) && (
             <span className="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block mb-2">
               Workspace
             </span>
@@ -129,9 +142,10 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                title={collapsed ? item.name : undefined}
+                onClick={isMobile ? onCloseMobile : undefined}
+                title={!isMobile && collapsed ? item.name : undefined}
                 className={`flex items-center rounded-xl text-xs font-mono font-semibold transition-all ${
-                  collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2"
+                  !isMobile && collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2"
                 } ${
                   isActive
                     ? "bg-[#ff5500] text-white shadow-md shadow-[#ff5500]/25"
@@ -139,7 +153,7 @@ export function Sidebar() {
                 }`}
               >
                 <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-white" : "text-slate-600"}`} />
-                {!collapsed && (
+                {(isMobile || !collapsed) && (
                   <div className="flex items-center justify-between w-full">
                     <span>{item.name}</span>
                     {item.badge && (
@@ -163,7 +177,7 @@ export function Sidebar() {
 
         {/* AI & Innovations Section */}
         <div className="space-y-1">
-          {!collapsed && (
+          {(isMobile || !collapsed) && (
             <span className="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block mb-2">
               AI &amp; Innovations
             </span>
@@ -175,9 +189,10 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                title={collapsed ? item.name : undefined}
+                onClick={isMobile ? onCloseMobile : undefined}
+                title={!isMobile && collapsed ? item.name : undefined}
                 className={`flex items-center rounded-xl text-xs font-mono font-semibold transition-all ${
-                  collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2"
+                  !isMobile && collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2"
                 } ${
                   isActive
                     ? "bg-[#ff5500] text-white shadow-md shadow-[#ff5500]/25"
@@ -185,7 +200,7 @@ export function Sidebar() {
                 }`}
               >
                 <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-white" : "text-slate-600"}`} />
-                {!collapsed && (
+                {(isMobile || !collapsed) && (
                   <div className="flex items-center justify-between w-full">
                     <span>{item.name}</span>
                     {item.badge && (
@@ -209,7 +224,7 @@ export function Sidebar() {
 
         {/* Intelligence Mesh Section */}
         <div className="space-y-1">
-          {!collapsed && (
+          {(isMobile || !collapsed) && (
             <span className="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block mb-2">
               Intelligence Mesh
             </span>
@@ -221,9 +236,10 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                title={collapsed ? item.name : undefined}
+                onClick={isMobile ? onCloseMobile : undefined}
+                title={!isMobile && collapsed ? item.name : undefined}
                 className={`flex items-center rounded-xl text-xs font-mono font-semibold transition-all ${
-                  collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2"
+                  !isMobile && collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2"
                 } ${
                   isActive
                     ? "bg-[#ff5500] text-white shadow-md shadow-[#ff5500]/25"
@@ -231,7 +247,7 @@ export function Sidebar() {
                 }`}
               >
                 <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-white" : "text-slate-600"}`} />
-                {!collapsed && (
+                {(isMobile || !collapsed) && (
                   <div className="flex items-center justify-between w-full">
                     <span>{item.name}</span>
                     {item.badge && (
@@ -256,7 +272,7 @@ export function Sidebar() {
 
       {/* Footer System Status */}
       <div className="p-3 border-t border-[#d4d4d8] bg-white/40">
-        {!collapsed ? (
+        {isMobile || !collapsed ? (
           <div className="flex items-center justify-between px-2 py-1.5 rounded-xl bg-white border border-[#d4d4d8] text-[10px] font-mono">
             <span className="text-slate-600 font-bold">STATUS:</span>
             <span className="flex items-center gap-1.5 text-emerald-600 font-bold">
@@ -270,6 +286,34 @@ export function Sidebar() {
           </div>
         )}
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar (hidden on mobile) */}
+      <aside
+        className={`hidden md:flex relative z-20 flex-col border-r border-[#d4d4d8] bg-[#f8f8fa] text-[#111113] backdrop-blur-2xl transition-all duration-300 shrink-0 ${
+          collapsed ? "w-16 sm:w-18" : "w-64"
+        }`}
+      >
+        {renderNavContent(false)}
+      </aside>
+
+      {/* Mobile Drawer Overlay Sheet */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={onCloseMobile}
+          />
+          {/* Drawer Panel */}
+          <aside className="relative z-50 flex w-72 max-w-[82vw] flex-col bg-[#f8f8fa] text-[#111113] shadow-2xl h-full border-r border-[#d4d4d8]">
+            {renderNavContent(true)}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

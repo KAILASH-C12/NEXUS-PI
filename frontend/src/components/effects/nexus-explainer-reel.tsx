@@ -103,14 +103,14 @@ export function NexusExplainerReel() {
                   setActiveChapter(idx);
                   setProgress(0);
                 }}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border-2 transition-all ${
                   isSelected
                     ? "bg-[#ff5500] text-white border-[#ff5500] shadow-md shadow-[#ff5500]/25 font-bold"
-                    : "bg-white text-slate-700 border-[#d4d4d8] hover:border-slate-400"
+                    : "bg-white text-slate-800 border-[#d4d4d8] hover:border-slate-400 font-semibold"
                 }`}
               >
                 <ChIcon className="h-3.5 w-3.5" />
-                <span>{ch.num} {ch.title.split(" ")[0]}</span>
+                <span>Step {idx + 1}: {ch.title}</span>
               </button>
             );
           })}

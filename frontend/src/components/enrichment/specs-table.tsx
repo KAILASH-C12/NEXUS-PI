@@ -74,9 +74,9 @@ export function SpecsTable({
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-5 backdrop-blur-xl shadow-xl space-y-4">
+    <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-5 shadow-sm space-y-4 font-mono text-[#111113]">
       {/* Header controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#d4d4d8] pb-3">
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
           <input
@@ -84,38 +84,34 @@ export function SpecsTable({
             placeholder="Filter specifications..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-lg border border-white/10 bg-white/[0.04] pl-8 pr-3 text-xs text-slate-200 placeholder:text-slate-500 focus:border-cyan-500/50 focus:outline-none"
+            className="h-8 w-full rounded-lg border border-[#d4d4d8] bg-slate-50 pl-8 pr-3 text-xs text-[#111113] placeholder:text-slate-500 focus:border-[#ff5500] focus:outline-none"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={copyAsJson}
-            className="h-8 border-white/10 bg-white/[0.02] hover:bg-white/[0.06] text-xs text-slate-300"
+            className="h-8 px-3 border border-[#d4d4d8] bg-slate-50 hover:bg-[#ff5500] hover:text-white hover:border-[#ff5500] text-xs font-bold text-slate-800 rounded-lg transition-all flex items-center gap-1.5 shadow-xs"
           >
-            {copied ? <Check className="h-3 w-3 text-emerald-400 mr-1.5" /> : <Copy className="h-3 w-3 mr-1.5" />}
-            <span>JSON</span>
-          </Button>
+            {copied ? <Check className="h-3 w-3 text-emerald-600 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
+            <span>Copy JSON</span>
+          </button>
 
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={exportCsv}
-            className="h-8 border-white/10 bg-white/[0.02] hover:bg-white/[0.06] text-xs text-slate-300"
+            className="h-8 px-3 border border-[#d4d4d8] bg-slate-50 hover:bg-[#ff5500] hover:text-white hover:border-[#ff5500] text-xs font-bold text-slate-800 rounded-lg transition-all flex items-center gap-1.5 shadow-xs"
           >
-            <Download className="h-3 w-3 mr-1.5" />
+            <Download className="h-3 w-3 mr-1" />
             <span>CSV</span>
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Specifications Table */}
-      <div className="rounded-xl border border-white/5 overflow-hidden">
+      <div className="rounded-xl border border-[#d4d4d8] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-white/[0.03] text-slate-400 font-mono uppercase text-[10px] tracking-wider border-b border-white/5">
+            <thead className="bg-slate-50 text-slate-600 font-mono uppercase text-[10px] tracking-wider border-b border-[#d4d4d8] font-bold">
               <tr>
                 <th className="py-2.5 px-4">Attribute Key</th>
                 <th className="py-2.5 px-4">Extracted Value</th>
@@ -124,59 +120,59 @@ export function SpecsTable({
                 <th className="py-2.5 px-4 text-right">Lineage</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 font-mono">
+            <tbody className="divide-y divide-slate-100 font-mono">
               {filtered.map((spec) => {
                 const conf = spec.confidence?.overall || 0.95;
                 const confPercent = Math.round(conf * 100);
 
                 return (
-                  <tr key={spec.attribute_name} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-2.5 px-4 font-semibold text-cyan-300">
+                  <tr key={spec.attribute_name} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-2.5 px-4 font-bold text-[#111113]">
                       {spec.attribute_name}
                     </td>
-                    <td className="py-2.5 px-4 text-white font-sans font-medium">
+                    <td className="py-2.5 px-4 text-slate-900 font-semibold">
                       {spec.value}
                     </td>
-                    <td className="py-2.5 px-4 text-slate-400">
+                    <td className="py-2.5 px-4 text-slate-600 font-semibold">
                       {spec.unit || "—"}
                     </td>
                     <td className="py-2.5 px-4 text-center">
                       <Tooltip>
                         <TooltipTrigger>
                           <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold cursor-help ${
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold cursor-help ${
                               confPercent >= 90
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                                 : confPercent >= 75
-                                ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
-                                : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                ? "bg-blue-100 text-blue-800 border border-blue-300"
+                                : "bg-amber-100 text-amber-800 border border-amber-300"
                             }`}
                           >
                             {confPercent}%
                           </span>
                         </TooltipTrigger>
-                        <TooltipContent side="top" className="bg-[#0f172a] border-white/10 text-xs p-3 space-y-1">
-                          <p className="font-bold text-white mb-1">4D Confidence Breakdown</p>
+                        <TooltipContent side="top" className="bg-slate-900 border border-slate-700 text-white text-xs p-3 space-y-1">
+                          <p className="font-bold text-[#ff5500] mb-1">4D Confidence Breakdown</p>
                           <div className="text-slate-300 flex justify-between gap-4">
                             <span>Source Reliability:</span>
-                            <span className="font-mono text-cyan-400">{Math.round((spec.confidence?.source_reliability || 0.95) * 100)}%</span>
+                            <span className="font-mono text-emerald-400 font-bold">{Math.round((spec.confidence?.source_reliability || 0.95) * 100)}%</span>
                           </div>
                           <div className="text-slate-300 flex justify-between gap-4">
                             <span>Cross-Reference:</span>
-                            <span className="font-mono text-cyan-400">{Math.round((spec.confidence?.cross_reference || 0.92) * 100)}%</span>
+                            <span className="font-mono text-emerald-400 font-bold">{Math.round((spec.confidence?.cross_reference || 0.92) * 100)}%</span>
                           </div>
                           <div className="text-slate-300 flex justify-between gap-4">
                             <span>Ontology Match:</span>
-                            <span className="font-mono text-cyan-400">{Math.round((spec.confidence?.ontology_consistency || 0.96) * 100)}%</span>
+                            <span className="font-mono text-emerald-400 font-bold">{Math.round((spec.confidence?.ontology_consistency || 0.96) * 100)}%</span>
                           </div>
                           <div className="text-slate-300 flex justify-between gap-4">
                             <span>Temporal Freshness:</span>
-                            <span className="font-mono text-cyan-400">{Math.round((spec.confidence?.temporal_freshness || 0.90) * 100)}%</span>
+                            <span className="font-mono text-emerald-400 font-bold">{Math.round((spec.confidence?.temporal_freshness || 0.90) * 100)}%</span>
                           </div>
                         </TooltipContent>
                       </Tooltip>
                     </td>
-                    <td className="py-2.5 px-4 text-right text-slate-400 text-[11px]">
+                    <td className="py-2.5 px-4 text-right text-slate-600 text-[11px] font-semibold">
                       {spec.provenance.length} Source{spec.provenance.length > 1 ? "s" : ""}
                     </td>
                   </tr>

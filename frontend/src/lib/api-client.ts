@@ -1,4 +1,4 @@
-import { ProductInput, ProductOutput, AIModelInfo, StreamStageEvent, ChatMessage } from "./types";
+import { ProductInput, ProductOutput, AIModelInfo, StreamStageEvent, ChatMessage, DashboardStats, ProductsListResponse } from "./types";
 import { SAMPLE_PRODUCTS, SAMPLE_AI_MODELS } from "./mock-data";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -34,18 +34,16 @@ export class NexusApiClient {
    * Synchronous Product Enrichment
    */
   static async enrichProduct(input: ProductInput): Promise<ProductOutput> {
-    try {
-      const res = await fetch(`${API_BASE}/enrich`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      return await res.json();
-    } catch (e) {
-      console.warn("Backend unavailable, generating client-side enriched model:", e);
-      return this.generateSimulatedEnrichment(input);
+    const res = await fetch(`${API_BASE}/enrich`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => "Unknown error");
+      throw new Error(`Enrichment failed (${res.status}): ${errorText}`);
     }
+    return await res.json();
   }
 
   /**
@@ -55,69 +53,57 @@ export class NexusApiClient {
     input: ProductInput,
     onEvent: (event: StreamStageEvent) => void
   ): Promise<ProductOutput> {
-    try {
-      const res = await fetch(`${API_BASE}/enrich/stream`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
+    const res = await fetch(`${API_BASE}/enrich/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
 
-      if (!res.ok || !res.body) {
-        throw new Error("Stream connection failed");
-      }
+    if (!res.ok || !res.body) {
+      throw new Error(`Stream connection failed (${res.status})`);
+    }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let finalResult: ProductOutput | null = null;
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let finalResult: ProductOutput | null = null;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split("\n");
 
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const data = JSON.parse(line.slice(6)) as StreamStageEvent;
-              onEvent(data);
-              if (data.stage === "COMPLETE" && data.result) {
-                finalResult = data.result;
-              }
-            } catch (err) {
-              console.error("Error parsing SSE event:", err);
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const data = JSON.parse(line.slice(6)) as StreamStageEvent;
+            onEvent(data);
+            if (data.stage === "COMPLETE" && data.result) {
+              finalResult = data.result;
             }
+          } catch (err) {
+            console.error("Error parsing SSE event:", err);
           }
         }
       }
-
-      if (finalResult) return finalResult;
-      return this.generateSimulatedEnrichment(input);
-    } catch (e) {
-      console.warn("Stream unavailable, running simulated progressive pipeline:", e);
-      return this.simulateProgressiveStream(input, onEvent);
     }
+
+    if (finalResult) return finalResult;
+    throw new Error("Stream completed without result");
   }
 
   /**
    * Batch Product Enrichment
    */
   static async batchEnrich(products: ProductInput[]): Promise<{ results: ProductOutput[]; total_processed: number; average_confidence: number }> {
-    try {
-      const res = await fetch(`${API_BASE}/batch`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ products }),
-      });
-      if (!res.ok) throw new Error("Batch request failed");
-      return await res.json();
-    } catch (e) {
-      console.warn("Batch API unavailable, simulating results:", e);
-      const results = products.map((p) => this.generateSimulatedEnrichment(p));
-      const avg = results.reduce((acc, r) => acc + r.quality_report.overall_confidence, 0) / results.length;
-      return { results, total_processed: results.length, average_confidence: Math.round(avg * 1000) / 1000 };
-    }
+    const res = await fetch(`${API_BASE}/batch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ products }),
+    });
+    if (!res.ok) throw new Error(`Batch request failed (${res.status})`);
+    return await res.json();
   }
 
   /**
@@ -252,139 +238,115 @@ export class NexusApiClient {
     }
   }
 
+  // ============================================================
+  // NEW: Database-backed Product CRUD
+  // ============================================================
+
   /**
-   * Progressive simulation fallback for stream
+   * Get all products from database with pagination & search
    */
-  private static async simulateProgressiveStream(
-    input: ProductInput,
-    onEvent: (event: StreamStageEvent) => void
-  ): Promise<ProductOutput> {
-    const pId = `NEXUS-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  static async getProducts(params?: {
+    page?: number;
+    page_size?: number;
+    search?: string;
+    brand?: string;
+    sort_by?: string;
+    sort_order?: string;
+  }): Promise<ProductsListResponse> {
+    const query = new URLSearchParams();
+    if (params?.page) query.set("page", String(params.page));
+    if (params?.page_size) query.set("page_size", String(params.page_size));
+    if (params?.search) query.set("search", params.search);
+    if (params?.brand) query.set("brand", params.brand);
+    if (params?.sort_by) query.set("sort_by", params.sort_by);
+    if (params?.sort_order) query.set("sort_order", params.sort_order);
 
-    onEvent({ stage: "INIT", progress: 5, message: `Initializing Autonomous Multi-Agent Pipeline for ${input.brand} ${input.part_number}...`, product_id: pId });
-    await new Promise((r) => setTimeout(r, 400));
-
-    onEvent({ stage: "DISCOVERY", progress: 25, agent: "Discovery Agent (Gemini 2.5 / SerpAPI)", message: `Crawling OEM data sheets, distributor catalogs, and PDF manuals for ${input.part_number}...`, sources_found: 7 });
-    await new Promise((r) => setTimeout(r, 700));
-
-    onEvent({ stage: "ANALYSIS", progress: 55, agent: "Analysis Agent (GPT-4o)", message: "Parsing technical specifications, standardizing SI units, classifying UNSPSC & eCl@ss taxonomies...", specs_count: 10 });
-    await new Promise((r) => setTimeout(r, 700));
-
-    onEvent({ stage: "ENRICHMENT", progress: 80, agent: "Enrichment Agent (Claude 3.7)", message: "Generating SEO-optimized long description, bullet points, meta tags, and compatibility graph...", features_generated: 6 });
-    await new Promise((r) => setTimeout(r, 600));
-
-    onEvent({ stage: "VALIDATION", progress: 95, agent: "Validation Agent (LLM-as-Judge 4D Engine)", message: "Executing cross-reference verification, anomaly detection, and computing 4D confidence vectors...", overall_confidence: 0.95 });
-    await new Promise((r) => setTimeout(r, 500));
-
-    const result = this.generateSimulatedEnrichment(input);
-    onEvent({ stage: "COMPLETE", progress: 100, message: "Pipeline completed successfully with 0 HITL escalation flags.", result });
-
-    return result;
+    const res = await fetch(`${API_BASE}/products?${query.toString()}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch products (${res.status})`);
+    return await res.json();
   }
 
   /**
-   * Helper simulator
+   * Get a single product from database
    */
-  private static generateSimulatedEnrichment(input: ProductInput): ProductOutput {
-    // Look up if we have a direct match in sample products
-    const match = SAMPLE_PRODUCTS.find((p) => p.input.part_number.toLowerCase() === input.part_number.toLowerCase());
-    if (match) {
-      return {
-        ...match,
-        product_id: `NEXUS-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        timestamp: new Date().toISOString(),
-        input,
-      };
+  static async getProduct(productId: string): Promise<ProductOutput> {
+    const res = await fetch(`${API_BASE}/products/${productId}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Product not found (${res.status})`);
+    return await res.json();
+  }
+
+  /**
+   * Delete a product from database
+   */
+  static async deleteProduct(productId: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/products/${productId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error(`Delete failed (${res.status})`);
+  }
+
+  /**
+   * Export a product as downloadable JSON
+   */
+  static async exportProduct(productId: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/products/${productId}/export`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Export failed (${res.status})`);
+    const data = await res.json();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `nexus_pi_${productId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Get dashboard statistics from database
+   */
+  static async getDashboardStats(): Promise<DashboardStats> {
+    const res = await fetch(`${API_BASE}/dashboard/stats`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Dashboard stats failed (${res.status})`);
+    return await res.json();
+  }
+
+  /**
+   * Get all brands in database
+   */
+  static async getBrands(): Promise<string[]> {
+    const res = await fetch(`${API_BASE}/brands`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Brands fetch failed (${res.status})`);
+    const data = await res.json();
+    return data.brands || [];
+  }
+
+  /**
+   * Upload real OEM PDF engineering datasheet
+   */
+  static async uploadPdfDocument(file: File): Promise<any> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${API_BASE}/documents/upload-pdf`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => "Upload failed");
+      throw new Error(`PDF upload failed (${res.status}): ${errorText}`);
     }
 
-    // Otherwise generate dynamic high-fidelity structure
-    const pId = `NEXUS-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    return {
-      product_id: pId,
-      timestamp: new Date().toISOString(),
-      input,
-      taxonomy: {
-        unspsc_code: "32151705",
-        unspsc_description: "Industrial Automation & Process Controllers",
-        eclass_code: "27-24-22-07",
-        eclass_description: "Industrial Control Unit",
-        product_category: "Industrial Automation & Controls",
-        confidence: { overall: 0.952, source_reliability: 0.97, cross_reference: 0.94, ontology_consistency: 0.96, temporal_freshness: 0.92 },
-      },
-      specifications: [
-        {
-          attribute_name: "supply_voltage",
-          value: "24",
-          unit: "V DC",
-          confidence: { overall: 0.975, source_reliability: 0.99, cross_reference: 0.96, ontology_consistency: 0.98, temporal_freshness: 0.93 },
-          provenance: [
-            { source_name: `${input.brand} Engineering Catalog`, extraction_method: "PDF_PARSE", reliability_score: 0.99, timestamp: new Date().toISOString() },
-          ],
-        },
-        {
-          attribute_name: "rated_power_consumption",
-          value: "12",
-          unit: "W",
-          confidence: { overall: 0.945, source_reliability: 0.97, cross_reference: 0.92, ontology_consistency: 0.95, temporal_freshness: 0.90 },
-          provenance: [
-            { source_name: "Mouser Technical Datasheet", extraction_method: "API_LOOKUP", reliability_score: 0.94, timestamp: new Date().toISOString() },
-          ],
-        },
-        {
-          attribute_name: "communication_interface",
-          value: "EtherNet/IP, Modbus TCP, PROFINET",
-          unit: null,
-          confidence: { overall: 0.962, source_reliability: 0.98, cross_reference: 0.95, ontology_consistency: 0.97, temporal_freshness: 0.91 },
-          provenance: [
-            { source_name: "Industrial Automation Standard Database", extraction_method: "KNOWLEDGE_GRAPH", reliability_score: 0.98, timestamp: new Date().toISOString() },
-          ],
-        },
-        {
-          attribute_name: "protection_degree",
-          value: "IP20 / NEMA Type 1",
-          unit: null,
-          confidence: { overall: 0.988, source_reliability: 0.99, cross_reference: 0.98, ontology_consistency: 0.99, temporal_freshness: 0.95 },
-          provenance: [
-            { source_name: "IEC 60529 Test Certificate", extraction_method: "PDF_PARSE", reliability_score: 0.99, timestamp: new Date().toISOString() },
-          ],
-        },
-        {
-          attribute_name: "operating_temperature",
-          value: "-20 to +60",
-          unit: "°C",
-          confidence: { overall: 0.938, source_reliability: 0.96, cross_reference: 0.91, ontology_consistency: 0.94, temporal_freshness: 0.89 },
-          provenance: [
-            { source_name: "OEM Environmental Specification", extraction_method: "PDF_PARSE", reliability_score: 0.97, timestamp: new Date().toISOString() },
-          ],
-        },
-      ],
-      commerce_content: {
-        long_description: `The ${input.brand} ${input.part_number} is an industrial-grade component engineered for high-availability production environments. Built with high electrical noise immunity and tested to international manufacturing standards, it guarantees seamless interoperability across modern SCADA and MES architectures.`,
-        features: [
-          `Engineered by ${input.brand} with genuine industrial OEM provenance`,
-          "Deterministic cycle execution with low thermal dissipation",
-          "Standardized DIN-rail / panel mounting with pluggable screw terminals",
-          "Verified for compliance with CE, UL, and RoHS directives",
-        ],
-        seo_meta_title: `${input.brand} ${input.part_number} | Industrial Catalog Intelligence`,
-        seo_meta_description: `Get verified specifications for ${input.brand} ${input.part_number}. 4D confidence score: 95%+, full source provenance, and technical attributes.`,
-        keywords: [input.brand, input.part_number, "Industrial Automation", "Control Systems", "Verified Specs"],
-      },
-      related_products: [
-        { part_number: `${input.part_number}-ACC1`, name: `${input.brand} Pluggable Terminal Block Kit`, relationship_type: "ACCESSORY", confidence: 0.97 },
-        { part_number: `${input.part_number}-EXP`, name: `${input.brand} High-Speed Expansion Module`, relationship_type: "COMPATIBLE", confidence: 0.95 },
-      ],
-      quality_report: {
-        overall_confidence: 0.952,
-        attributes_validated: 5,
-        attributes_high_confidence: 5,
-        attributes_medium_confidence: 0,
-        attributes_low_confidence: 0,
-        human_review_required: false,
-        flags: [],
-        sources_consulted: 5,
-        processing_time_seconds: 1.25,
-      },
-    };
+    return await res.json();
+  }
+
+  /**
+   * Check if backend is reachable
+   */
+  static async isBackendAvailable(): Promise<boolean> {
+    try {
+      const res = await fetch(`${API_BASE}/health`, { method: "GET", cache: "no-store" });
+      return res.ok;
+    } catch {
+      return false;
+    }
   }
 }

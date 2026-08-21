@@ -46,3 +46,8 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+
+# --- Local SQLite Database ---
+*.db
+*.sqlite3
+data/*.db

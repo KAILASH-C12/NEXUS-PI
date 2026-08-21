@@ -102,9 +102,16 @@ function EnrichmentStudioContent() {
 
       setActiveProduct(result);
       addToHistory(result);
-      toast.success(`Enrichment complete for ${result.input.brand} ${result.input.part_number}`);
+      toast.success(`✅ Enrichment complete for ${result.input.brand} ${result.input.part_number} — saved to database`, {
+        duration: 5000,
+        action: {
+          label: "View History",
+          onClick: () => router.push("/history"),
+        },
+      });
     } catch (err: any) {
-      toast.error(`Enrichment error: ${err.message || "Failed"}`);
+      toast.error(`Enrichment error: ${err.message || "Failed"}. Is the backend running on port 8000?`, { duration: 8000 });
+
     } finally {
       setIsStreaming(false);
       setCurrentStage("COMPLETE");

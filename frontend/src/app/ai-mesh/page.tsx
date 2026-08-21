@@ -118,96 +118,97 @@ export default function AiMeshStudioPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-8 max-w-6xl text-[#111113]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#d4d4d8] pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-white tracking-tight">
+            <span className="h-2 w-2 bg-[#ff5500] inline-block" />
+            <h1 className="text-2xl font-black font-mono text-[#111113] tracking-tight uppercase">
               Multimodal AI Mesh &amp; Model Benchmark Studio
             </h1>
-            <Badge variant="outline" className="text-xs font-mono text-cyan-400 border-cyan-500/30">
+            <Badge variant="outline" className="text-xs font-mono text-[#ff5500] border-[#ff5500]/40 bg-[#ff5500]/10 font-bold">
               6 Model Engines Synchronized
             </Badge>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs font-mono text-slate-600 mt-1">
             Explore OpenAI GPT-4o, Gemini 2.5 Flash Vision, Claude 3.7 Judge, Whisper v3, DALL-E 3 CAD, and Hugging Face LangGraph
           </p>
         </div>
       </div>
 
       {/* 6 Models Interactive Stations Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
-        <TabsList className="bg-white/[0.04] border border-white/10 p-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1">
-          <TabsTrigger value="gpt4o" className="text-xs flex items-center gap-1.5 py-2.5">
-            <Cpu className="h-3.5 w-3.5 text-cyan-400" />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6 font-mono">
+        <TabsList className="bg-white border-2 border-[#d4d4d8] p-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1 rounded-2xl shadow-xs">
+          <TabsTrigger value="gpt4o" className="text-xs flex items-center gap-1.5 py-2.5 font-bold data-[state=active]:bg-[#ff5500] data-[state=active]:text-white rounded-xl transition-all">
+            <Cpu className="h-3.5 w-3.5" />
             <span>1. GPT-4o</span>
           </TabsTrigger>
 
-          <TabsTrigger value="gemini" className="text-xs flex items-center gap-1.5 py-2.5">
-            <Camera className="h-3.5 w-3.5 text-indigo-400" />
+          <TabsTrigger value="gemini" className="text-xs flex items-center gap-1.5 py-2.5 font-bold data-[state=active]:bg-[#ff5500] data-[state=active]:text-white rounded-xl transition-all">
+            <Camera className="h-3.5 w-3.5" />
             <span>2. Gemini Vision</span>
           </TabsTrigger>
 
-          <TabsTrigger value="claude" className="text-xs flex items-center gap-1.5 py-2.5">
-            <ShieldCheck className="h-3.5 w-3.5 text-pink-400" />
+          <TabsTrigger value="claude" className="text-xs flex items-center gap-1.5 py-2.5 font-bold data-[state=active]:bg-[#ff5500] data-[state=active]:text-white rounded-xl transition-all">
+            <ShieldCheck className="h-3.5 w-3.5" />
             <span>3. Claude 3.7</span>
           </TabsTrigger>
 
-          <TabsTrigger value="whisper" className="text-xs flex items-center gap-1.5 py-2.5">
-            <Volume2 className="h-3.5 w-3.5 text-emerald-400" />
+          <TabsTrigger value="whisper" className="text-xs flex items-center gap-1.5 py-2.5 font-bold data-[state=active]:bg-[#ff5500] data-[state=active]:text-white rounded-xl transition-all">
+            <Volume2 className="h-3.5 w-3.5" />
             <span>4. Whisper v3</span>
           </TabsTrigger>
 
-          <TabsTrigger value="dalle" className="text-xs flex items-center gap-1.5 py-2.5">
-            <Box className="h-3.5 w-3.5 text-amber-400" />
+          <TabsTrigger value="dalle" className="text-xs flex items-center gap-1.5 py-2.5 font-bold data-[state=active]:bg-[#ff5500] data-[state=active]:text-white rounded-xl transition-all">
+            <Box className="h-3.5 w-3.5" />
             <span>5. DALL-E 3</span>
           </TabsTrigger>
 
-          <TabsTrigger value="huggingface" className="text-xs flex items-center gap-1.5 py-2.5">
-            <Binary className="h-3.5 w-3.5 text-sky-400" />
+          <TabsTrigger value="huggingface" className="text-xs flex items-center gap-1.5 py-2.5 font-bold data-[state=active]:bg-[#ff5500] data-[state=active]:text-white rounded-xl transition-all">
+            <Binary className="h-3.5 w-3.5" />
             <span>6. HuggingFace</span>
           </TabsTrigger>
         </TabsList>
 
         {/* 1. GPT-4o Omni Station */}
         <TabsContent value="gpt4o" className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-6 backdrop-blur-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d4d4d8] pb-4">
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-black text-[#111113] flex items-center gap-2">
                   OpenAI GPT-4o Omni &mdash; Multi-Agent Graph Engine
-                  <Badge variant="secondary" className="text-[10px] font-mono bg-cyan-500/10 text-cyan-300">
+                  <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-800 border border-slate-300 font-bold">
                     Orchestration
                   </Badge>
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-600 mt-1 font-semibold">
                   Drives state graph transitions, technical attribute entity extraction, and comparative synthesis.
                 </p>
               </div>
 
-              <Button
+              <button
                 onClick={handleTestGpt}
                 disabled={isGptRunning}
-                className="h-10 px-6 gap-2 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-xs rounded-xl shadow-md shadow-cyan-500/20"
+                className="h-10 px-6 gap-2 bg-[#ff5500] hover:bg-[#e04b00] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md shadow-[#ff5500]/25 transition-all flex items-center shrink-0"
               >
                 {isGptRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
                 <span>Run GPT-4o Graph Test</span>
-              </Button>
+              </button>
             </div>
 
             {gptOutput && (
-              <div className="rounded-xl bg-black/50 border border-cyan-500/30 p-4 font-mono text-xs overflow-x-auto space-y-2">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                  <span className="text-cyan-300 font-bold flex items-center gap-1.5">
+              <div className="rounded-xl bg-slate-900 border border-slate-700 p-4 text-xs overflow-x-auto space-y-2 text-white">
+                <div className="flex items-center justify-between border-b border-slate-700 pb-2">
+                  <span className="text-[#ff5500] font-bold flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                     GPT-4o Entity Normalization Payload
                   </span>
-                  <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30">
+                  <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/50 bg-emerald-950/40">
                     Latency: 142ms
                   </Badge>
                 </div>
-                <pre className="text-slate-200 leading-relaxed">
+                <pre className="text-slate-200 leading-relaxed font-mono">
                   {JSON.stringify(gptOutput, null, 2)}
                 </pre>
               </div>
@@ -217,41 +218,41 @@ export default function AiMeshStudioPage() {
 
         {/* 2. Google Gemini 2.5 Flash Station */}
         <TabsContent value="gemini" className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-6 backdrop-blur-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d4d4d8] pb-4">
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-black text-[#111113] flex items-center gap-2">
                   Google Gemini 2.5 Flash &mdash; Multimodal Vision OCR
-                  <Badge variant="secondary" className="text-[10px] font-mono bg-indigo-500/10 text-indigo-300">
+                  <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-800 border border-slate-300 font-bold">
                     Vision OCR
                   </Badge>
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-600 mt-1 font-semibold">
                   Extracts electrical nameplate parameters, barcodes, and wiring diagrams with optical bounding boxes.
                 </p>
               </div>
 
-              <Button
+              <button
                 onClick={() => setImageOpen(true)}
-                className="h-10 px-6 gap-2 bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-white font-semibold text-xs rounded-xl shadow-md"
+                className="h-10 px-6 gap-2 bg-[#111113] hover:bg-[#222228] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center shrink-0"
               >
                 <Camera className="h-4 w-4" />
                 <span>Launch Camera &amp; Vision Scanner</span>
-              </Button>
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Optical Grounding:</span>
-                <span className="text-white font-bold text-sm">97.8% Accuracy</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Optical Grounding:</span>
+                <span className="text-[#111113] font-extrabold text-sm">97.8% Accuracy</span>
               </div>
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">OCR Latency:</span>
-                <span className="text-indigo-300 font-bold text-sm">98ms (Sub-100ms)</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">OCR Latency:</span>
+                <span className="text-[#ff5500] font-extrabold text-sm">98ms (Sub-100ms)</span>
               </div>
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Supported Formats:</span>
-                <span className="text-emerald-400 font-bold text-sm">Live Camera, PNG, JPG, PDF</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Supported Formats:</span>
+                <span className="text-emerald-700 font-extrabold text-sm">Live Camera, PNG, JPG, PDF</span>
               </div>
             </div>
           </div>
@@ -259,42 +260,42 @@ export default function AiMeshStudioPage() {
 
         {/* 3. Anthropic Claude 3.7 Sonnet Station */}
         <TabsContent value="claude" className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-6 backdrop-blur-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d4d4d8] pb-4">
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-black text-[#111113] flex items-center gap-2">
                   Anthropic Claude 3.7 Sonnet &mdash; LLM-as-Judge Auditor
-                  <Badge variant="secondary" className="text-[10px] font-mono bg-pink-500/10 text-pink-300">
+                  <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-800 border border-slate-300 font-bold">
                     QA Auditor
                   </Badge>
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-600 mt-1 font-semibold">
                   Audits multi-source consensus, detects parameter anomalies, and generates verified B2B copy.
                 </p>
               </div>
 
-              <Button
+              <button
                 onClick={handleTestClaude}
                 disabled={isClaudeRunning}
-                className="h-10 px-6 gap-2 bg-gradient-to-r from-pink-500 to-indigo-600 hover:from-pink-400 hover:to-indigo-500 text-white font-semibold text-xs rounded-xl shadow-md shadow-pink-500/20"
+                className="h-10 px-6 gap-2 bg-[#ff5500] hover:bg-[#e04b00] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md shadow-[#ff5500]/25 transition-all flex items-center shrink-0"
               >
                 {isClaudeRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
                 <span>Execute Claude 3.7 Judge Audit</span>
-              </Button>
+              </button>
             </div>
 
             {claudeOutput && (
-              <div className="rounded-xl bg-black/50 border border-pink-500/30 p-4 font-mono text-xs overflow-x-auto space-y-2">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                  <span className="text-pink-300 font-bold flex items-center gap-1.5">
+              <div className="rounded-xl bg-slate-900 border border-slate-700 p-4 text-xs overflow-x-auto space-y-2 text-white">
+                <div className="flex items-center justify-between border-b border-slate-700 pb-2">
+                  <span className="text-pink-400 font-bold flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                     Claude 3.7 4D Audit Verdict
                   </span>
-                  <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30">
+                  <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/50 bg-emerald-950/40">
                     Composite: 96.5%
                   </Badge>
                 </div>
-                <pre className="text-slate-200 leading-relaxed">
+                <pre className="text-slate-200 leading-relaxed font-mono">
                   {JSON.stringify(claudeOutput, null, 2)}
                 </pre>
               </div>
@@ -304,41 +305,41 @@ export default function AiMeshStudioPage() {
 
         {/* 4. OpenAI Whisper v3 Station */}
         <TabsContent value="whisper" className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-6 backdrop-blur-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d4d4d8] pb-4">
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-black text-[#111113] flex items-center gap-2">
                   OpenAI Whisper v3 &mdash; Shopfloor Voice Dictation
-                  <Badge variant="secondary" className="text-[10px] font-mono bg-emerald-500/10 text-emerald-300">
+                  <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-800 border border-slate-300 font-bold">
                     Acoustic Voice
                   </Badge>
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-600 mt-1 font-semibold">
                   Enables technicians to log parts and electrical specs hands-free with ambient noise filtering.
                 </p>
               </div>
 
-              <Button
+              <button
                 onClick={() => setVoiceOpen(true)}
-                className="h-10 px-6 gap-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-black font-semibold text-xs rounded-xl shadow-md"
+                className="h-10 px-6 gap-2 bg-[#111113] hover:bg-[#222228] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center shrink-0"
               >
                 <Mic className="h-4 w-4" />
                 <span>Open Whisper Dictation Studio</span>
-              </Button>
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Word Error Rate (WER):</span>
-                <span className="text-emerald-400 font-bold text-sm">&lt; 1.8% Industrial Vocab</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Word Error Rate (WER):</span>
+                <span className="text-emerald-700 font-extrabold text-sm">&lt; 1.8% Industrial Vocab</span>
               </div>
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Multi-Lingual Support:</span>
-                <span className="text-cyan-300 font-bold text-sm">99+ Languages</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Multi-Lingual Support:</span>
+                <span className="text-[#111113] font-extrabold text-sm">99+ Languages</span>
               </div>
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Sampling Rate:</span>
-                <span className="text-white font-bold text-sm">16 kHz / 32-bit Float</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Sampling Rate:</span>
+                <span className="text-indigo-700 font-extrabold text-sm">16 kHz / 32-bit Float</span>
               </div>
             </div>
           </div>
@@ -346,41 +347,41 @@ export default function AiMeshStudioPage() {
 
         {/* 5. OpenAI DALL-E 3 Station */}
         <TabsContent value="dalle" className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-6 backdrop-blur-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d4d4d8] pb-4">
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-black text-[#111113] flex items-center gap-2">
                   OpenAI DALL-E 3 &mdash; 3D CAD &amp; Blueprint Synthesizer
-                  <Badge variant="secondary" className="text-[10px] font-mono bg-amber-500/10 text-amber-300">
+                  <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-800 border border-slate-300 font-bold">
                     CAD Schematics
                   </Badge>
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-600 mt-1 font-semibold">
                   Generates exploded 3D component cutaways and electrical wiring blueprints from specification metadata.
                 </p>
               </div>
 
-              <Button
+              <button
                 onClick={() => setSchematicOpen(true)}
-                className="h-10 px-6 gap-2 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-white font-semibold text-xs rounded-xl shadow-md"
+                className="h-10 px-6 gap-2 bg-[#ff5500] hover:bg-[#e04b00] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md shadow-[#ff5500]/25 transition-all flex items-center shrink-0"
               >
                 <Box className="h-4 w-4" />
                 <span>Launch DALL-E 3 CAD Studio</span>
-              </Button>
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Render Modes:</span>
-                <span className="text-amber-300 font-bold text-sm">Exploded 3D &bull; Wiring &bull; Pinout</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Render Modes:</span>
+                <span className="text-amber-700 font-extrabold text-sm">Exploded 3D &bull; Wiring &bull; Pinout</span>
               </div>
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Resolution:</span>
-                <span className="text-white font-bold text-sm">1024 &times; 1024 High-Def</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Resolution:</span>
+                <span className="text-[#111113] font-extrabold text-sm">1024 &times; 1024 High-Def</span>
               </div>
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Metadata Output:</span>
-                <span className="text-cyan-400 font-bold text-sm">JSON Annotation Layer</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Metadata Output:</span>
+                <span className="text-cyan-700 font-extrabold text-sm">JSON Annotation Layer</span>
               </div>
             </div>
           </div>
@@ -388,59 +389,59 @@ export default function AiMeshStudioPage() {
 
         {/* 6. Hugging Face Transformers & LangGraph Station */}
         <TabsContent value="huggingface" className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#0c1222]/80 p-6 backdrop-blur-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="rounded-2xl border-2 border-[#d4d4d8] bg-white p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#d4d4d8] pb-4">
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-black text-[#111113] flex items-center gap-2">
                   Hugging Face Transformers &amp; LangGraph State Machine
-                  <Badge variant="secondary" className="text-[10px] font-mono bg-sky-500/10 text-sky-300">
+                  <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-800 border border-slate-300 font-bold">
                     Open-Source &bull; PyTorch
                   </Badge>
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-600 mt-1 font-semibold">
                   Executes dense 1024-dim BGE embeddings, DeepSeek-R1 math logic reasoning, and LangChain state transitions.
                 </p>
               </div>
 
-              <Button
+              <button
                 onClick={handleTestHuggingFace}
                 disabled={isHfRunning}
-                className="h-10 px-6 gap-2 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-semibold text-xs rounded-xl shadow-md shadow-sky-500/20"
+                className="h-10 px-6 gap-2 bg-[#111113] hover:bg-[#222228] text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center shrink-0"
               >
                 {isHfRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Binary className="h-4 w-4" />}
                 <span>Execute HuggingFace Benchmark</span>
-              </Button>
+              </button>
             </div>
 
             {hfOutput && (
-              <div className="rounded-xl bg-black/50 border border-sky-500/30 p-4 font-mono text-xs overflow-x-auto space-y-2">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                  <span className="text-sky-300 font-bold flex items-center gap-1.5">
+              <div className="rounded-xl bg-slate-900 border border-slate-700 p-4 text-xs overflow-x-auto space-y-2 text-white">
+                <div className="flex items-center justify-between border-b border-slate-700 pb-2">
+                  <span className="text-sky-400 font-bold flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                     HuggingFace &amp; LangGraph State Machine Payload
                   </span>
-                  <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30">
+                  <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/50 bg-emerald-950/40">
                     Latency: 64ms
                   </Badge>
                 </div>
-                <pre className="text-slate-200 leading-relaxed">
+                <pre className="text-slate-200 leading-relaxed font-mono">
                   {JSON.stringify(hfOutput, null, 2)}
                 </pre>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Vector Embedding Model:</span>
-                <span className="text-sky-300 font-bold text-sm">BAAI/bge-large-en-v1.5</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Vector Embedding Model:</span>
+                <span className="text-sky-700 font-extrabold text-sm">BAAI/bge-large-en-v1.5</span>
               </div>
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">State Machine Framework:</span>
-                <span className="text-white font-bold text-sm">LangGraph Cyclic Graph</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">State Machine Framework:</span>
+                <span className="text-[#111113] font-extrabold text-sm">LangGraph Cyclic Graph</span>
               </div>
-              <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                <span className="text-slate-500 block text-[10px] uppercase">Inference Backend:</span>
-                <span className="text-emerald-400 font-bold text-sm">FastAPI + PyTorch CUDA</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#d4d4d8] space-y-1">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Inference Backend:</span>
+                <span className="text-emerald-700 font-extrabold text-sm">FastAPI + PyTorch CUDA</span>
               </div>
             </div>
           </div>

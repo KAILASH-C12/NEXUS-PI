@@ -110,7 +110,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#ececee] text-[#111113] selection:bg-[#ff5500] selection:text-white -mx-6 -my-8 p-4 sm:p-8 space-y-12 font-sans overflow-hidden">
+    <div className="relative w-full text-[#111113] selection:bg-[#ff5500] selection:text-white space-y-12 font-sans pb-16">
       {/* ── FLOATING RIGHT-SIDE ARCHITECTURAL UTILITY DOCK ── */}
       <div className="hidden xl:flex fixed right-4 top-1/3 -translate-y-1/2 z-40 flex-col items-center bg-white/95 backdrop-blur-md border border-[#d2d2d6] rounded-2xl p-2 shadow-2xl space-y-3">
         <button
@@ -312,7 +312,138 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── 2. INTERACTIVE MOTION EXPLAINER REEL ── */}
+      {/* ── 2. INTERACTIVE 1-CLICK ACTION LAUNCHPAD (EASY TO FIGURE OUT) ── */}
+      <section className="rounded-3xl border-2 border-[#111113] bg-white p-6 sm:p-8 shadow-xl space-y-6 font-mono text-[#111113]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#d4d4d8] pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 bg-[#ff5500] inline-block" />
+              <h2 className="text-xl font-black uppercase tracking-tight">
+                Quick-Start Action Launchpad
+              </h2>
+              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300 text-[10px] font-bold">
+                Interactive Guided Workflow
+              </Badge>
+            </div>
+            <p className="text-xs text-slate-600 font-semibold mt-1">
+              Select an action below or click any real OEM part number to test the multi-agent swarm instantly
+            </p>
+          </div>
+        </div>
+
+        {/* 1-Click Quick Ingestion Search Bar */}
+        <div className="p-4 rounded-2xl bg-slate-50 border-2 border-[#d4d4d8] space-y-3">
+          <span className="text-[11px] font-bold uppercase text-slate-600 block">
+            1-Click Test Any Real Industrial Part Number:
+          </span>
+
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: "⚡ Siemens S7-1200 CPU", part: "6ES7214-1AG40-0XB0" },
+              { label: "⚡ Schneider Altivar Inverter", part: "ATV320U15N4B" },
+              { label: "⚡ Rockwell ControlLogix 10MB", part: "1756-L83E" },
+              { label: "⚡ Phoenix Contact 24V PSU", part: "2904601" },
+              { label: "⚡ Omron Diffuse Photo Sensor", part: "E3Z-D61 2M" },
+              { label: "⚡ ABB 150kg Articulated Robot", part: "IRB 6700-150/3.20" },
+            ].map((preset) => (
+              <Link
+                key={preset.part}
+                href={`/enrich?q=${encodeURIComponent(preset.part)}`}
+                className="h-8 px-3 rounded-lg border border-[#d4d4d8] bg-white hover:border-[#ff5500] hover:bg-[#ff5500]/10 hover:text-[#ff5500] text-slate-800 text-xs font-bold transition-all flex items-center gap-1 shadow-2xs"
+              >
+                <span>{preset.label}</span>
+                <ArrowRight className="h-3 w-3 opacity-60" />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* 3 Core Interactive Action Pathways */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+          {/* Action 1 */}
+          <div className="p-5 rounded-2xl border-2 border-[#d4d4d8] bg-white hover:border-[#ff5500] hover:shadow-lg transition-all space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ff5500]/10 text-[#ff5500]">
+                <Cpu className="h-5 w-5" />
+              </div>
+              <h3 className="font-extrabold text-sm text-[#111113] uppercase">1. Single Part Intelligence</h3>
+              <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                Enter any raw part number. The 7-agent swarm crawls datasheets, extracts specs, maps UNSPSC codes, and scores 4D trust in 1.4s.
+              </p>
+            </div>
+            <Link href="/enrich">
+              <button className="w-full h-9 bg-[#ff5500] hover:bg-[#e04b00] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md shadow-[#ff5500]/25">
+                <span>Launch Enrichment Studio</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </Link>
+          </div>
+
+          {/* Action 2 */}
+          <div className="p-5 rounded-2xl border-2 border-[#d4d4d8] bg-white hover:border-indigo-400 hover:shadow-lg transition-all space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
+                <FileSpreadsheet className="h-5 w-5" />
+              </div>
+              <h3 className="font-extrabold text-sm text-[#111113] uppercase">2. Bulk Catalog &amp; PDF Ingestion</h3>
+              <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                Drop your CSV, Excel spreadsheets, or OEM technical PDF manuals to parallelize multi-page extraction and export clean PIM catalogs.
+              </p>
+            </div>
+            <Link href="/batch">
+              <button className="w-full h-9 bg-[#111113] hover:bg-[#222228] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md">
+                <span>Upload Batch / PDF</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </Link>
+          </div>
+
+          {/* Action 3 */}
+          <div className="p-5 rounded-2xl border-2 border-[#d4d4d8] bg-white hover:border-emerald-400 hover:shadow-lg transition-all space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                <GitCompare className="h-5 w-5" />
+              </div>
+              <h3 className="font-extrabold text-sm text-[#111113] uppercase">3. Cross-Vendor Migration</h3>
+              <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                Replace obsolete or long-lead hardware with compatible alternatives, complete with terminal screw pinout bridge and PLC SCL code.
+              </p>
+            </div>
+            <Link href="/cross-vendor">
+              <button className="w-full h-9 border-2 border-[#111113] bg-white hover:bg-slate-100 text-[#111113] font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5">
+                <span>Open Pinout Bridge</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Interactive Copilot Questions */}
+        <div className="p-4 rounded-2xl bg-slate-50 border border-[#d4d4d8] space-y-2">
+          <span className="text-[11px] font-bold uppercase text-slate-600 block">
+            Ask Copilot an Engineering Question:
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {[
+              "Compare Siemens CPU 1214C vs 1215C",
+              "What is the UNSPSC code for PLC controllers?",
+              "Check RoHS 2011/65/EU and REACH SVHC requirements",
+              "How to transpile Rockwell Studio 5000 ladder logic to Siemens TIA Portal?",
+            ].map((q, i) => (
+              <Link
+                key={i}
+                href={`/chat`}
+                className="text-xs bg-white hover:bg-[#ff5500] hover:text-white border border-[#d4d4d8] rounded-lg px-3 py-1.5 font-semibold text-slate-800 transition-all flex items-center gap-1.5"
+              >
+                <Sparkles className="h-3 w-3 text-[#ff5500]" />
+                <span>&quot;{q}&quot;</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3. INTERACTIVE MOTION EXPLAINER REEL ── */}
       <section className="space-y-4">
         <NexusExplainerReel />
       </section>

@@ -83,9 +83,9 @@ export function LiveAgentThoughtStream({ logs = DEFAULT_LOGS }: { logs?: LogEntr
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#070b16] p-5 font-mono shadow-2xl space-y-3 text-xs">
-      <div className="flex items-center justify-between border-b border-white/10 pb-3">
-        <div className="flex items-center gap-2 text-cyan-400">
+    <div className="rounded-2xl border-2 border-slate-700 bg-slate-950 p-5 font-mono shadow-2xl space-y-3 text-xs">
+      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="flex items-center gap-2 text-[#ff5500]">
           <Terminal className="h-4 w-4" />
           <span className="font-bold text-white tracking-wider text-xs uppercase">
             Live Agent Execution Trace &amp; Tool Invocations
@@ -93,18 +93,16 @@ export function LiveAgentThoughtStream({ logs = DEFAULT_LOGS }: { logs?: LogEntr
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30">
+          <Badge className="text-[10px] bg-emerald-950 text-emerald-300 border-emerald-700 font-bold">
             Telemetry Stream Active
           </Badge>
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={copyLogText}
-            className="h-7 text-[11px] border-white/10 text-slate-300"
+            className="h-7 px-2.5 text-[11px] font-bold rounded-lg border border-slate-700 bg-slate-900 text-slate-200 hover:text-white flex items-center gap-1"
           >
             {copied ? <Check className="h-3 w-3 text-emerald-400 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
             <span>Copy Trace</span>
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -112,15 +110,15 @@ export function LiveAgentThoughtStream({ logs = DEFAULT_LOGS }: { logs?: LogEntr
         {logs.map((entry, idx) => {
           let actionColor = "text-slate-400";
           if (entry.action === "TOOL_CALL") actionColor = "text-cyan-400 font-bold";
-          if (entry.action === "TOOL_RESULT") actionColor = "text-emerald-400";
-          if (entry.action === "EMIT_STATE") actionColor = "text-pink-400 font-bold";
+          if (entry.action === "TOOL_RESULT") actionColor = "text-emerald-400 font-bold";
+          if (entry.action === "EMIT_STATE") actionColor = "text-[#ff5500] font-bold";
 
           return (
-            <div key={idx} className="flex items-start gap-2 hover:bg-white/[0.02] p-1 rounded transition-colors">
-              <span className="text-slate-600 select-none">[{entry.timestamp}]</span>
-              <span className="text-indigo-400 font-semibold shrink-0">{entry.agent}:</span>
+            <div key={idx} className="flex items-start gap-2 hover:bg-slate-900/60 p-1 rounded transition-colors">
+              <span className="text-slate-500 font-bold select-none">[{entry.timestamp}]</span>
+              <span className="text-indigo-400 font-bold shrink-0">{entry.agent}:</span>
               <span className={`shrink-0 ${actionColor}`}>[{entry.action}]</span>
-              <span className="text-slate-300 flex-1">{entry.message}</span>
+              <span className="text-slate-200 flex-1 font-semibold">{entry.message}</span>
             </div>
           );
         })}
