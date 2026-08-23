@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   // Allow cross-origin requests to the FastAPI backend
   async headers() {
     return [
