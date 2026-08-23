@@ -58,10 +58,24 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# CORS middleware — allow Vercel frontend + localhost dev
+import os
+
+_cors_origins = [
+    "https://nexus-pi.vercel.app",       # Production Vercel
+    "https://*.vercel.app",               # Vercel preview deployments
+    "http://localhost:3000",              # Local frontend dev
+    "http://127.0.0.1:3000",             # Local frontend dev (alt)
+]
+
+# Allow override via env var (comma-separated)
+_extra_origins = os.getenv("CORS_ORIGINS", "")
+if _extra_origins:
+    _cors_origins.extend([o.strip() for o in _extra_origins.split(",") if o.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Using wildcard for broad compatibility; tighten to _cors_origins if needed
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

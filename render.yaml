@@ -1,0 +1,47 @@
+# ============================================================
+# NEXUS-PI — Render Infrastructure-as-Code Blueprint
+# ============================================================
+# Docs: https://docs.render.com/blueprint-spec
+
+services:
+  - type: web
+    name: nexus-pi-api
+    runtime: python
+    repo: https://github.com/KAILASH-C12/NEXUS-PI.git
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn nexus_pi.api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PRIMARY_MODEL
+        value: gpt-4o
+      - key: ANALYSIS_MODEL
+        value: gpt-4o
+      - key: ENRICHMENT_MODEL
+        value: gpt-4o
+      - key: VALIDATION_MODEL
+        value: gpt-4o
+      - key: CONFIDENCE_THRESHOLD
+        value: "0.70"
+      - key: MAX_SEARCH_RESULTS
+        value: "5"
+      - key: ENABLE_WEB_SEARCH
+        value: "true"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: API_PORT
+        value: "10000"
+      # Secrets — set these manually in the Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SERPAPI_API_KEY
+        sync: false
