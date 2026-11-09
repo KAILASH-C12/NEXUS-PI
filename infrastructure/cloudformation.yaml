@@ -1,0 +1,823 @@
+# =============================================================================
+# NEXUS-PI — AWS CloudFormation Template
+# =============================================================================
+# This template provisions the full infrastructure stack for the NEXUS-PI
+# multi-provider AI aggregation platform.
+#
+# Resources created:
+#   • VPC with 2 public subnets, Internet Gateway, and route tables
+#   • Security Groups for the API (port 8000) and frontend (ports 3000/80/443)
+#   • IAM roles for backend runtime, deployment, and monitoring
+#   • ECR repositories for API and frontend container images
+#   • Secrets Manager secrets for AI-provider API keys
+#   • CloudWatch Log Groups with 30-day retention
+#   • EC2 instance (Docker-ready) for initial deployment
+#   • CloudWatch Alarms for CPU utilisation and 5xx error rate
+#
+# Usage:
+#   aws cloudformation deploy \
+#     --template-file cloudformation.yaml \
+#     --stack-name nexus-pi-<env> \
+#     --parameter-overrides Environment=dev KeyPairName=my-key \
+#     --capabilities CAPABILITY_NAMED_IAM
+# =============================================================================
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  NEXUS-PI Infrastructure — VPC, compute, container registries, secrets,
+  monitoring, and IAM for the multi-provider AI aggregation platform.
+
+# =============================================================================
+# Parameters
+# =============================================================================
+Parameters:
+  Environment:
+    Type: String
+    Description: Deployment environment (dev, staging, or prod).
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    ConstraintDescription: Must be one of dev, staging, or prod.
+
+  InstanceType:
+    Type: String
+    Description: EC2 instance type for the initial deployment host.
+    Default: t3.small
+    AllowedValues:
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+    ConstraintDescription: Must be a valid t3 instance type.
+
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 key pair for SSH access.
+
+  AllowedCIDR:
+    Type: String
+    Description: CIDR block allowed to SSH into the EC2 instance (e.g. 203.0.113.0/32).
+    Default: "0.0.0.0/0"
+    AllowedPattern: ^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$
+    ConstraintDescription: Must be a valid CIDR notation (x.x.x.x/x).
+
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Description: Latest Amazon Linux 2023 AMI (resolved automatically via SSM).
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+# =============================================================================
+# Mappings — CIDR blocks per environment
+# =============================================================================
+Mappings:
+  SubnetConfig:
+    VPC:
+      CIDR: "10.0.0.0/16"
+    PublicSubnetA:
+      CIDR: "10.0.1.0/24"
+    PublicSubnetB:
+      CIDR: "10.0.2.0/24"
+
+# =============================================================================
+# Resources
+# =============================================================================
+Resources:
+
+  # ---------------------------------------------------------------------------
+  # 1. NETWORKING — VPC, Subnets, Internet Gateway, Route Tables
+  # ---------------------------------------------------------------------------
+
+  # Main VPC for the NEXUS-PI stack
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !FindInMap [SubnetConfig, VPC, CIDR]
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub "nexus-pi-vpc-${Environment}"
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # Internet Gateway — enables outbound internet access from public subnets
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "nexus-pi-igw-${Environment}"
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # Attach the IGW to the VPC
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # Public Subnet A — first availability zone
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap [SubnetConfig, PublicSubnetA, CIDR]
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub "nexus-pi-public-a-${Environment}"
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # Public Subnet B — second availability zone (for HA / ALB requirements)
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap [SubnetConfig, PublicSubnetB, CIDR]
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub "nexus-pi-public-b-${Environment}"
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # Route table for public subnets — directs 0.0.0.0/0 to the IGW
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "nexus-pi-public-rt-${Environment}"
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # Default route → Internet Gateway
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+  # Associate subnet A with the public route table
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  # Associate subnet B with the public route table
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  # ---------------------------------------------------------------------------
+  # 2. SECURITY GROUPS
+  # ---------------------------------------------------------------------------
+
+  # Security group for the FastAPI backend (port 8000)
+  APISecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow inbound traffic to the NEXUS-PI API on port 8000 and SSH
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        # API traffic
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          CidrIp: "0.0.0.0/0"
+          Description: API access (port 8000)
+        # SSH access — restricted to AllowedCIDR
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AllowedCIDR
+          Description: SSH access (restricted)
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: "0.0.0.0/0"
+          Description: Allow all outbound traffic
+      Tags:
+        - Key: Name
+          Value: !Sub "nexus-pi-api-sg-${Environment}"
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # Security group for the React frontend (ports 3000, 80, 443)
+  FrontendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow inbound traffic to the NEXUS-PI frontend on ports 80, 443, and 3000
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        # Development server
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: "0.0.0.0/0"
+          Description: Frontend dev server (port 3000)
+        # HTTP
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+          Description: HTTP traffic
+        # HTTPS
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+          Description: HTTPS traffic
+        # SSH access — restricted to AllowedCIDR
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AllowedCIDR
+          Description: SSH access (restricted)
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: "0.0.0.0/0"
+          Description: Allow all outbound traffic
+      Tags:
+        - Key: Name
+          Value: !Sub "nexus-pi-frontend-sg-${Environment}"
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # ---------------------------------------------------------------------------
+  # 3. IAM ROLES
+  # ---------------------------------------------------------------------------
+
+  # --- 3a. Backend Runtime Role ---
+  # Used by the EC2 instance / ECS task running the FastAPI backend.
+  # Grants read access to Secrets Manager (provider API keys) and write
+  # access to CloudWatch Logs & Metrics.
+  BackendRuntimeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nexus-pi-backend-runtime-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+                - ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SecretsManagerReadAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:DescribeSecret
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:nexus-pi/*"
+        - PolicyName: CloudWatchWriteAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogStreams
+                  - cloudwatch:PutMetricData
+                Resource: "*"
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # Instance profile so EC2 can assume the backend runtime role
+  BackendInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub "nexus-pi-backend-profile-${Environment}"
+      Roles:
+        - !Ref BackendRuntimeRole
+
+  # --- 3b. Deployment Role ---
+  # Used by CI/CD pipelines to push images to ECR and manage CloudFormation.
+  DeploymentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nexus-pi-deployment-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+          # Allow the current account to assume (for CLI-based deploys)
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ECRPushAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+                  - ecr:PutImage
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                Resource:
+                  - !GetAtt ECRApiRepository.Arn
+                  - !GetAtt ECRFrontendRepository.Arn
+        - PolicyName: CloudFormationAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:UpdateStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:GetTemplate
+                  - cloudformation:ValidateTemplate
+                  - cloudformation:ListStackResources
+                Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/nexus-pi-*/*"
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # --- 3c. Monitoring Read-Only Role ---
+  # Used by dashboards / on-call tooling for read-only observability access.
+  MonitoringRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nexus-pi-monitoring-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess
+      Policies:
+        - PolicyName: LogsReadAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:GetLogEvents
+                  - logs:FilterLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/nexus-pi/*"
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # ---------------------------------------------------------------------------
+  # 4. ECR REPOSITORIES — container image registries
+  # ---------------------------------------------------------------------------
+
+  # ECR repository for the FastAPI backend image
+  ECRApiRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "nexus-pi-api-${Environment}"
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        # Keep only the last 10 untagged images to control storage costs
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Expire untagged images older than 14 days",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countUnit": "days",
+                  "countNumber": 14
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # ECR repository for the React frontend image
+  ECRFrontendRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "nexus-pi-frontend-${Environment}"
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Expire untagged images older than 14 days",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countUnit": "days",
+                  "countNumber": 14
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # ---------------------------------------------------------------------------
+  # 5. SECRETS MANAGER — placeholder secrets for AI-provider API keys
+  # ---------------------------------------------------------------------------
+  # Each secret is created with a placeholder value.  Replace the values via
+  # the AWS Console or CLI before the application starts:
+  #   aws secretsmanager put-secret-value --secret-id nexus-pi/<env>/OPENAI_API_KEY \
+  #       --secret-string '{"api_key":"sk-..."}'
+
+  OpenAIApiKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "nexus-pi/${Environment}/OPENAI_API_KEY"
+      Description: OpenAI API key used by the NEXUS-PI backend.
+      SecretString: '{"api_key":"PLACEHOLDER_REPLACE_ME"}'
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  GoogleApiKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "nexus-pi/${Environment}/GOOGLE_API_KEY"
+      Description: Google Gemini API key used by the NEXUS-PI backend.
+      SecretString: '{"api_key":"PLACEHOLDER_REPLACE_ME"}'
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  AnthropicApiKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "nexus-pi/${Environment}/ANTHROPIC_API_KEY"
+      Description: Anthropic Claude API key used by the NEXUS-PI backend.
+      SecretString: '{"api_key":"PLACEHOLDER_REPLACE_ME"}'
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  SerpApiKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "nexus-pi/${Environment}/SERPAPI_API_KEY"
+      Description: SerpAPI key for web-search capabilities in NEXUS-PI.
+      SecretString: '{"api_key":"PLACEHOLDER_REPLACE_ME"}'
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # ---------------------------------------------------------------------------
+  # 6. CLOUDWATCH LOG GROUPS — centralised application logs
+  # ---------------------------------------------------------------------------
+
+  # Log group for the FastAPI backend
+  APILogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/nexus-pi/${Environment}/api"
+      RetentionInDays: 30
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # Log group for the React frontend (Nginx / SSR logs)
+  FrontendLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/nexus-pi/${Environment}/frontend"
+      RetentionInDays: 30
+      Tags:
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+
+  # ---------------------------------------------------------------------------
+  # 7. EC2 INSTANCE — initial deployment host with Docker pre-installed
+  # ---------------------------------------------------------------------------
+
+  # The instance runs Amazon Linux 2023 and uses user-data to install Docker,
+  # Docker Compose, and pull starter images from ECR on first boot.
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      ImageId: !Ref LatestAmiId
+      IamInstanceProfile: !Ref BackendInstanceProfile
+      SubnetId: !Ref PublicSubnetA
+      SecurityGroupIds:
+        - !Ref APISecurityGroup
+        - !Ref FrontendSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp3
+            Encrypted: true
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+
+          # ---- System updates ----
+          dnf update -y
+
+          # ---- Install Docker ----
+          dnf install -y docker
+          systemctl enable docker
+          systemctl start docker
+          usermod -aG docker ec2-user
+
+          # ---- Install Docker Compose v2 ----
+          mkdir -p /usr/local/lib/docker/cli-plugins
+          curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
+            -o /usr/local/lib/docker/cli-plugins/docker-compose
+          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+          # ---- Install AWS CLI v2 (for ECR login) ----
+          dnf install -y aws-cli
+
+          # ---- Signal CloudFormation that the instance is ready ----
+          /opt/aws/bin/cfn-signal -e $? \
+            --stack ${AWS::StackName} \
+            --resource EC2Instance \
+            --region ${AWS::Region}
+      Tags:
+        - Key: Name
+          Value: !Sub "nexus-pi-host-${Environment}"
+        - Key: Project
+          Value: NEXUS-PI
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Owner
+          Value: nexus-pi-team
+        - Key: CostCentre
+          Value: nexus-pi
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT10M
+
+  # ---------------------------------------------------------------------------
+  # 8. CLOUDWATCH ALARMS
+  # ---------------------------------------------------------------------------
+
+  # Alarm: CPU utilisation exceeds 80% for 5 consecutive minutes
+  HighCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "nexus-pi-high-cpu-${Environment}"
+      AlarmDescription: >-
+        Triggers when EC2 instance CPU utilisation exceeds 80% for 5 minutes.
+        Investigate backend load or consider scaling up.
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref EC2Instance
+      Statistic: Average
+      Period: 300          # 5 minutes
+      EvaluationPeriods: 1
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: missing
+      # NOTE: Add an SNS topic ARN below to receive notifications
+      # AlarmActions:
+      #   - !Ref AlertSNSTopic
+
+  # Alarm: 5xx error rate (placeholder — requires a custom metric or ALB)
+  # This alarm uses a custom metric namespace.  The backend application should
+  # publish "5xxCount" to the "NEXUS-PI/API" namespace via CloudWatch PutMetricData.
+  High5xxErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "nexus-pi-5xx-errors-${Environment}"
+      AlarmDescription: >-
+        Placeholder alarm for 5xx errors.  Fires when the custom 5xxCount
+        metric exceeds 10 in a 5-minute window.  The backend must publish
+        this metric to the NEXUS-PI/API namespace.
+      Namespace: NEXUS-PI/API
+      MetricName: 5xxCount
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      # AlarmActions:
+      #   - !Ref AlertSNSTopic
+
+# =============================================================================
+# Outputs — key resource identifiers for downstream consumers
+# =============================================================================
+Outputs:
+  VPCId:
+    Description: ID of the NEXUS-PI VPC
+    Value: !Ref VPC
+    Export:
+      Name: !Sub "nexus-pi-vpc-id-${Environment}"
+
+  PublicSubnetAId:
+    Description: ID of public subnet A
+    Value: !Ref PublicSubnetA
+    Export:
+      Name: !Sub "nexus-pi-public-subnet-a-${Environment}"
+
+  PublicSubnetBId:
+    Description: ID of public subnet B
+    Value: !Ref PublicSubnetB
+    Export:
+      Name: !Sub "nexus-pi-public-subnet-b-${Environment}"
+
+  EC2PublicIP:
+    Description: Public IP address of the deployment EC2 instance
+    Value: !GetAtt EC2Instance.PublicIp
+
+  ECRApiRepositoryURI:
+    Description: URI of the API ECR repository
+    Value: !GetAtt ECRApiRepository.RepositoryUri
+    Export:
+      Name: !Sub "nexus-pi-ecr-api-uri-${Environment}"
+
+  ECRFrontendRepositoryURI:
+    Description: URI of the frontend ECR repository
+    Value: !GetAtt ECRFrontendRepository.RepositoryUri
+    Export:
+      Name: !Sub "nexus-pi-ecr-frontend-uri-${Environment}"
+
+  APISecurityGroupId:
+    Description: Security group ID for the API tier
+    Value: !Ref APISecurityGroup
+    Export:
+      Name: !Sub "nexus-pi-api-sg-${Environment}"
+
+  FrontendSecurityGroupId:
+    Description: Security group ID for the frontend tier
+    Value: !Ref FrontendSecurityGroup
+    Export:
+      Name: !Sub "nexus-pi-frontend-sg-${Environment}"
+
+  BackendRuntimeRoleArn:
+    Description: ARN of the backend runtime IAM role
+    Value: !GetAtt BackendRuntimeRole.Arn
+
+  DeploymentRoleArn:
+    Description: ARN of the deployment IAM role
+    Value: !GetAtt DeploymentRole.Arn
+
+  MonitoringRoleArn:
+    Description: ARN of the monitoring read-only IAM role
+    Value: !GetAtt MonitoringRole.Arn

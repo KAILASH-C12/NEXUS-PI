@@ -1,0 +1,137 @@
+# =============================================================================
+# NEXUS-PI  —  Prometheus Alert Rules
+# =============================================================================
+# Alert groups:
+#   1. API Health        – HTTP 5xx rate, p95 latency
+#   2. Infrastructure    – CPU, Memory
+#   3. AI Workflow       – Agent task failures, provider timeouts
+# =============================================================================
+
+groups:
+
+  # =========================================================================
+  # Group 1: API Health Alerts
+  # =========================================================================
+  - name: nexus_pi_api_health
+    rules:
+
+      # --- HTTP 5xx error rate > 5 % for 5 consecutive minutes ---
+      - alert: HighHTTP5xxRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="nexus-pi-backend", status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="nexus-pi-backend"}[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: nexus-pi-api
+        annotations:
+          summary: "High HTTP 5xx error rate on NEXUS-PI backend"
+          description: >-
+            The 5xx error rate has exceeded 5 % for the last 5 minutes.
+            Current value: {{ $value | humanizePercentage }}.
+
+      # --- p95 API latency > 2 seconds for 5 minutes ---
+      - alert: HighP95Latency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="nexus-pi-backend"}[5m])) by (le)
+          ) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+          service: nexus-pi-api
+        annotations:
+          summary: "p95 API latency exceeds 2 s on NEXUS-PI backend"
+          description: >-
+            The 95th-percentile request latency has been above 2 seconds
+            for 5 minutes. Current p95: {{ $value | humanizeDuration }}.
+
+  # =========================================================================
+  # Group 2: Infrastructure Alerts
+  # =========================================================================
+  - name: nexus_pi_infrastructure
+    rules:
+
+      # --- CPU utilisation > 80 % for 10 minutes ---
+      - alert: HighCPUUsage
+        expr: |
+          100 - (
+            avg by (instance) (
+              rate(node_cpu_seconds_total{mode="idle", job="node-exporter"}[5m])
+            ) * 100
+          ) > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: nexus-pi-host
+        annotations:
+          summary: "CPU usage above 80 % on {{ $labels.instance }}"
+          description: >-
+            Average CPU utilisation has exceeded 80 % for the last 10 minutes.
+            Current value: {{ $value | printf "%.1f" }}%.
+
+      # --- Memory utilisation > 80 % for 10 minutes ---
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            1 - (
+              node_memory_MemAvailable_bytes{job="node-exporter"}
+              /
+              node_memory_MemTotal_bytes{job="node-exporter"}
+            )
+          ) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: nexus-pi-host
+        annotations:
+          summary: "Memory usage above 80 % on {{ $labels.instance }}"
+          description: >-
+            Memory utilisation has exceeded 80 % for the last 10 minutes.
+            Current value: {{ $value | printf "%.1f" }}%.
+
+  # =========================================================================
+  # Group 3: AI Workflow Alerts
+  # =========================================================================
+  - name: nexus_pi_ai_workflow
+    rules:
+
+      # --- Agent task failure rate > 5 % over 10 minutes ---
+      - alert: HighAgentTaskFailureRate
+        expr: |
+          (
+            sum(rate(agent_task_failures_total{job="nexus-pi-backend"}[10m]))
+            /
+            sum(rate(agent_task_runs_total{job="nexus-pi-backend"}[10m]))
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          service: nexus-pi-agents
+        annotations:
+          summary: "Agent task failure rate exceeds 5 %"
+          description: >-
+            More than 5 % of agent tasks have failed over the last 10 minutes.
+            Current failure rate: {{ $value | humanizePercentage }}.
+
+      # --- Provider timeout rate > 10 % over 5 minutes ---
+      - alert: HighProviderTimeoutRate
+        expr: |
+          (
+            sum(rate(provider_timeouts_total{job="nexus-pi-backend"}[5m]))
+            /
+            sum(rate(provider_requests_total{job="nexus-pi-backend"}[5m]))
+          ) > 0.10
+        for: 5m
+        labels:
+          severity: warning
+          service: nexus-pi-providers
+        annotations:
+          summary: "Provider timeout rate exceeds 10 %"
+          description: >-
+            More than 10 % of upstream provider calls have timed out
+            over the last 5 minutes. Current rate: {{ $value | humanizePercentage }}.

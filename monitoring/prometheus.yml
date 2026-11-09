@@ -1,0 +1,67 @@
+# =============================================================================
+# NEXUS-PI  —  Prometheus Configuration
+# =============================================================================
+# Scrape targets:
+#   1. FastAPI backend  (localhost:8000/metrics, 15 s interval)
+#   2. Node Exporter    (localhost:9100,         30 s interval)
+#   3. Prometheus self  (localhost:9090,         15 s default)
+# =============================================================================
+
+global:
+  scrape_interval: 15s          # Default scrape interval
+  evaluation_interval: 15s      # How often to evaluate alerting rules
+  scrape_timeout: 10s           # Per-target timeout
+
+  external_labels:
+    project: "nexus-pi"
+    environment: "production"
+
+# ---------------------------------------------------------------------------
+# Alerting – forward firing alerts to Alertmanager
+# ---------------------------------------------------------------------------
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - "localhost:9093"   # Default Alertmanager endpoint
+
+# ---------------------------------------------------------------------------
+# Rule files (alerting + recording rules)
+# ---------------------------------------------------------------------------
+rule_files:
+  - "alert-rules.yml"
+
+# ---------------------------------------------------------------------------
+# Scrape configurations
+# ---------------------------------------------------------------------------
+scrape_configs:
+
+  # ---- 1. Prometheus self-monitoring ----
+  - job_name: "prometheus"
+    static_configs:
+      - targets:
+          - "localhost:9090"
+    metrics_path: /metrics
+
+  # ---- 2. FastAPI Backend ----
+  - job_name: "nexus-pi-backend"
+    scrape_interval: 15s         # Matches global; explicit for clarity
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "api:8000"
+          - "localhost:8000"
+        labels:
+          service: "nexus-pi-api"
+          component: "backend"
+
+  # ---- 3. Node Exporter (host metrics) ----
+  - job_name: "node-exporter"
+    scrape_interval: 30s         # Lower frequency for system-level metrics
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "localhost:9100"
+        labels:
+          service: "nexus-pi-host"
+          component: "infrastructure"

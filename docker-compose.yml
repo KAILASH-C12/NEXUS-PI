@@ -1,0 +1,148 @@
+# =============================================================
+# NEXUS-PI — Docker Compose (Local Multi-Service Development)
+# =============================================================
+# Brings up the FastAPI backend and Next.js frontend together
+# with shared networking, persistent volumes, and health checks.
+#
+# Usage:
+#   docker compose up --build        # Build & start all services
+#   docker compose up -d             # Detached mode
+#   docker compose logs -f api       # Tail API logs
+#   docker compose down -v           # Stop & remove volumes
+# =============================================================
+
+# ----- Shared network for inter-service communication --------
+networks:
+  nexus-net:
+    driver: bridge
+    name: nexus-pi-network
+
+# ----- Named volumes for data persistence --------------------
+volumes:
+  nexus-data:
+    driver: local
+    name: nexus-pi-data
+
+# =============================================================
+# Services
+# =============================================================
+services:
+
+  # -----------------------------------------------------------
+  # 1. API — FastAPI backend (Python 3.11 / Uvicorn)
+  # -----------------------------------------------------------
+  # Serves the REST & SSE streaming endpoints at /api/v1/*.
+  # SQLite database is persisted via a bind-mount + named volume
+  # so data survives container restarts.
+  # -----------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexus-pi-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Bind-mount the local ./data directory into the container
+      # so the SQLite DB (data/nexus_pi.db) persists on the host.
+      - ./data:/app/data
+      # Named volume as a secondary persistence layer
+      - nexus-data:/app/data
+    env_file:
+      - .env
+    environment:
+      # Ensure the API binds to all interfaces inside the container
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    networks:
+      - nexus-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  # -----------------------------------------------------------
+  # 2. Frontend — Next.js dashboard (Node 20)
+  # -----------------------------------------------------------
+  # The production-built Next.js app that talks to the API
+  # service over the internal Docker network (http://api:8000).
+  # -----------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked into the client-side JS bundle at build time (accessed by host browser)
+        NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    container_name: nexus-pi-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - nexus-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+
+  # -----------------------------------------------------------
+  # 3. Prometheus — Time-Series Metrics & Alerting
+  # -----------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: nexus-pi-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+    networks:
+      - nexus-net
+    restart: unless-stopped
+
+  # -----------------------------------------------------------
+  # 4. Grafana — Visual Observability Dashboards
+  # -----------------------------------------------------------
+  # Mapped to host port 3001 so it doesn't conflict with Next.js (port 3000).
+  # Default login: admin / admin
+  # -----------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nexus-pi-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    networks:
+      - nexus-net
+    restart: unless-stopped

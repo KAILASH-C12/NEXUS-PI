@@ -1,0 +1,17 @@
+# ---- NEXUS-PI Frontend .dockerignore ----
+# Keep the Docker build context small and prevent secrets from leaking.
+
+node_modules
+.next
+out
+.env
+.env.*
+!.env.example
+npm-debug.log*
+.git
+.gitignore
+README.md
+AGENTS.md
+CLAUDE.md
+Dockerfile
+.dockerignore

@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Enable standalone output for optimized Docker deployments
+  output: "standalone",
   // Allow cross-origin requests to the FastAPI backend
   async headers() {
     return [

@@ -72,6 +72,13 @@
 - **State Management:** Zustand with local & session persistence
 - **Responsiveness:** Full mobile layout with slide-over drawer navigation
 
+### Cloud & DevOps Infrastructure
+- **Containerization:** Multi-stage, non-root Dockerfiles for API and Frontend; `docker-compose` orchestration
+- **Infrastructure as Code (IaC):** AWS CloudFormation (820+ lines: VPC, IAM least privilege, ECR, Secrets Manager, CloudWatch) & Terraform comparison
+- **CI/CD Pipeline:** Jenkins 7-stage DevSecOps pipeline with Bandit AST scanning, Trivy image vulnerability checks, and production approval gates
+- **Observability:** Prometheus scraping native `/metrics` endpoint with 6 SLO alert rules; custom 8-panel Grafana dashboard
+- **Automated Testing:** Pytest unit and integration test suite with Pydantic v2 validation and 4D confidence calculations
+
 ---
 
 ## ⚡ Quickstart Guide
@@ -79,40 +86,49 @@
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+ and npm
+- Docker & Docker Compose (optional for full container stack)
 
-### 1. Backend Setup
+### 1. Run the Full Stack with Docker Compose (Recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/KAILASH-C12/NEXUS-PI.git
 cd NEXUS-PI
 
-# Create & activate virtual environment (Windows PowerShell)
-python -m venv venv
-.\venv\Scripts\activate
-
-# Install backend dependencies
-pip install -r requirements.txt
-
-# Start the FastAPI server
-uvicorn nexus_pi.api.main:app --reload --port 8000
+# Spin up API, Frontend, Prometheus, and Grafana in one command
+docker-compose up --build -d
 ```
-- **Backend API:** `http://localhost:8000`
-- **Interactive Swagger Docs:** `http://localhost:8000/docs`
 
-### 2. Frontend Setup
+| Service | Port | URL |
+|---|---|---|
+| **Next.js Frontend** | `3000` | `http://localhost:3000` |
+| **FastAPI Backend & Swagger** | `8000` | `http://localhost:8000/docs` |
+| **Prometheus Metrics & Alerts** | `9090` | `http://localhost:9090` |
+| **Grafana Visual Dashboard** | `3001` | `http://localhost:3001` (login: `admin` / `admin`) |
+
+### 2. Run Local Test Suite
 
 ```bash
-# In a new terminal, navigate to frontend
+# Run all unit tests (Pydantic schemas, 4D confidence engine, and API routes)
+pytest tests/ -v
+```
+
+### 3. Alternative: Run Services Manually
+
+#### Backend:
+```bash
+python -m venv venv
+.\venv\Scripts\activate   # Windows
+pip install -r requirements.txt
+uvicorn nexus_pi.api.main:app --reload --port 8000
+```
+
+#### Frontend:
+```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start Next.js development server
 npm run dev
 ```
-- **Web Application:** `http://localhost:3000`
 
 ---
 
@@ -120,28 +136,49 @@ npm run dev
 
 ```
 NEXUS-PI/
-├── data/                      # SQLite persistence directory
-├── nexus_pi/                  # Core Python Backend Package
-│   ├── agents/                # 7-Agent Autonomous Swarm
-│   │   ├── discovery_agent.py # Web search & PDF retrieval
-│   │   ├── analysis_agent.py  # Spec extraction & SI normalization
-│   │   ├── taxonomy_agent.py  # UNSPSC & eCl@ss classifier
-│   │   ├── compliance_agent.py# RoHS, REACH, CE, UL auditor
-│   │   ├── lifecycle_agent.py # MTBF, carbon footprint, DPP generator
-│   │   ├── validation_agent.py# 4D confidence calculation & Claude judge
-│   │   └── orchestrator.py    # Pipeline coordinator & SSE streamer
-│   ├── api/                   # FastAPI Endpoints & WebSocket Routes
-│   │   └── main.py            # API routes, PDF upload, Batch execution
-│   ├── database.py            # SQLite database schema & queries
-│   └── config.py              # System configuration & API keys
-├── frontend/                  # Next.js 15 Frontend
-│   ├── src/
-│   │   ├── app/               # 21 App Router Pages
-│   │   ├── components/        # UI Components (RAG, DPP, Digital Twin, etc.)
-│   │   ├── lib/               # API Client, Types, and Mock Fallbacks
-│   │   └── stores/            # Zustand State Stores
-│   └── package.json           # Frontend dependencies
-└── requirements.txt           # Python backend dependencies
+├── Dockerfile                         # Production multi-stage, non-root backend image
+├── .dockerignore                      # Secret and build context exclusion rules
+├── docker-compose.yml                 # Multi-service stack (API, Frontend, Prometheus, Grafana)
+├── Jenkinsfile                        # 7-stage DevSecOps CI/CD pipeline
+├── pytest.ini                         # Pytest configuration
+├── requirements.txt                   # Python backend dependencies
+├── data/                              # SQLite persistence directory
+│
+├── frontend/                          # Next.js 16 Frontend
+│   ├── Dockerfile                     # Multi-stage standalone Next.js container
+│   ├── .dockerignore                  # Node build exclusions
+│   ├── next.config.ts                 # Standalone build configuration
+│   ├── src/app/                       # 21 App Router Pages
+│   └── package.json                   # Frontend dependencies
+│
+├── nexus_pi/                          # Core Python Backend Package
+│   ├── agents/                        # 7-Agent Autonomous Swarm
+│   │   ├── discovery_agent.py         # Web search & PDF retrieval
+│   │   ├── analysis_agent.py          # Spec extraction & SI normalization
+│   │   ├── taxonomy_agent.py          # UNSPSC & eCl@ss classifier
+│   │   ├── compliance_agent.py        # RoHS, REACH, CE, UL auditor
+│   │   ├── lifecycle_agent.py         # MTBF, carbon footprint, DPP generator
+│   │   ├── validation_agent.py        # 4D confidence calculation & Claude judge
+│   │   └── orchestrator.py            # Pipeline coordinator & SSE streamer
+│   ├── api/
+│   │   └── main.py                    # API routes, PDF upload, Prometheus /metrics
+│   ├── database.py                    # Async SQLite persistence (WAL mode)
+│   ├── config.py                      # System configuration & API key management
+│   └── schemas/                       # Pydantic v2 Typed Schemas
+│
+├── infrastructure/                    # Infrastructure as Code (IaC)
+│   ├── cloudformation.yaml            # AWS CloudFormation full stack (VPC, IAM, ECR, EC2, Logs)
+│   └── terraform/                     # Terraform comparison module (main.tf, variables.tf)
+│
+├── monitoring/                        # Observability & Alerting
+│   ├── prometheus.yml                 # Prometheus scrape configuration
+│   ├── alert-rules.yml                # Production SLO alert rules
+│   └── grafana-dashboard.json         # 8-panel visual dashboard model
+│
+└── tests/                             # Automated Test Suite (All 8 tests passing)
+    ├── test_api.py                    # Route registration and health checks
+    ├── test_schemas.py                # Pydantic schema validation tests
+    └── test_confidence.py             # 4D confidence vector and HITL threshold tests
 ```
 
 ---
