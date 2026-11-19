@@ -12,6 +12,19 @@ import { Sparkles, Layers, Loader2, Download, Image as ImageIcon, CheckCircle2, 
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
+interface SchematicResult {
+  model: string;
+  schematic_title: string;
+  cad_dimensions: {
+    width_mm: number;
+    height_mm: number;
+    depth_mm: number;
+    weight_g: number;
+    mounting: string;
+  };
+  annotations: string[];
+}
+
 export function SchematicGeneratorModal({
   open,
   onOpenChange,
@@ -25,7 +38,7 @@ export function SchematicGeneratorModal({
 }) {
   const [schematicType, setSchematicType] = useState<"EXPLODED_3D" | "WIRING_BLUEPRINT" | "PINOUT_DIAGRAM">("EXPLODED_3D");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [result, setResult] = useState<SchematicResult | null>(null);
 
   const handleGenerate = async () => {
     setIsGenerating(true);

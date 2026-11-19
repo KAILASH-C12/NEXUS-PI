@@ -28,6 +28,27 @@ import { NexusApiClient } from "@/lib/api-client";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
+interface ExtractedVisionResult {
+  status?: string;
+  vision_model?: string;
+  detected_brand?: string;
+  detected_part_number?: string;
+  optical_confidence?: number;
+  extracted_nameplate?: {
+    model_name?: string;
+    model_series?: string;
+    rated_voltage?: string;
+    supply_type?: string;
+    ip_rating?: string;
+    certifications?: string[];
+  };
+  suggested_product_input?: {
+    part_number: string;
+    brand: string;
+    description: string;
+  };
+}
+
 export function ImageUploadModal({
   open,
   onOpenChange,
@@ -40,7 +61,7 @@ export function ImageUploadModal({
   const [activeTab, setActiveTab] = useState<"camera" | "upload" | "presets">("camera");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [extractedPreview, setExtractedPreview] = useState<Record<string, unknown> | null>(null);
+  const [extractedPreview, setExtractedPreview] = useState<ExtractedVisionResult | null>(null);
 
   // Camera stream state
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -215,7 +236,7 @@ export function ImageUploadModal({
         </DialogHeader>
 
         {/* 3 High-Contrast Input Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "camera" | "upload" | "samples")} className="w-full space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "camera" | "upload" | "presets")} className="w-full space-y-4">
           <TabsList className="bg-slate-100 border border-[#d4d4d8] p-1 grid grid-cols-3 gap-1 rounded-xl h-auto">
             <TabsTrigger
               value="camera"
@@ -399,7 +420,7 @@ export function ImageUploadModal({
                 Optical Detection &amp; Bounding Regions
               </span>
               <Badge variant="outline" className="text-[10px] text-emerald-700 border-emerald-400 bg-emerald-50 font-bold">
-                {Math.round(extractedPreview.optical_confidence * 100)}% Optical Grounding
+                {Math.round((extractedPreview.optical_confidence || 0.95) * 100)}% Optical Grounding
               </Badge>
             </div>
 

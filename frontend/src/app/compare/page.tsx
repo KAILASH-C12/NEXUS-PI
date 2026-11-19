@@ -37,7 +37,7 @@ export default function CompareMatrixPage() {
         compareList.map((p) => p.input.part_number),
         compareList[0].input.brand
       );
-      setAiAnalysis(res.ai_synthesis);
+      setAiAnalysis(typeof res.ai_synthesis === "string" ? res.ai_synthesis : null);
       toast.success("AI Differential Synthesis generated");
     } catch {
       toast.error("Comparison analysis failed");

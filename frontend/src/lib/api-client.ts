@@ -280,6 +280,15 @@ export class NexusApiClient {
   }
 
   /**
+   * Export product by ID
+   */
+  static async exportProduct(productId: string): Promise<Record<string, unknown>> {
+    const res = await fetch(`${API_BASE}/products/${productId}`);
+    if (!res.ok) throw new Error(`Export failed (${res.status})`);
+    return await res.json();
+  }
+
+  /**
    * Get platform-wide dashboard stats
    */
   static async getDashboardStats(): Promise<DashboardStats> {

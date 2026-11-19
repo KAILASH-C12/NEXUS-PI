@@ -338,7 +338,7 @@ export default function AgentLabPage() {
                       <Sparkles className="h-4 w-4 text-emerald-600" />
                       <span>Agent Output Result</span>
                     </span>
-                    {currentOutput && (
+                    {Boolean(currentOutput) && (
                       <button
                         onClick={() => copyOutput(currentOutput)}
                         className="text-[11px] text-slate-600 hover:text-[#ff5500] font-bold flex items-center gap-1"
