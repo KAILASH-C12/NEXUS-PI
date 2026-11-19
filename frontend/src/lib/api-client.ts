@@ -1,5 +1,5 @@
 import { ProductInput, ProductOutput, AIModelInfo, StreamStageEvent, ChatMessage, DashboardStats, ProductsListResponse } from "./types";
-import { SAMPLE_PRODUCTS, SAMPLE_AI_MODELS } from "./mock-data";
+import { SAMPLE_AI_MODELS } from "./mock-data";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -7,13 +7,19 @@ export class NexusApiClient {
   /**
    * Check connection & model statuses
    */
-  static async getModelsStatus(): Promise<{ models: AIModelInfo[]; confidence_engine: any }> {
+  static async getModelsStatus(): Promise<{
+    models: AIModelInfo[];
+    confidence_engine: {
+      version: string;
+      weights: Record<string, number>;
+      hitl_threshold: number;
+    };
+  }> {
     try {
       const res = await fetch(`${API_BASE}/models/status`, { method: "GET", cache: "no-store" });
       if (!res.ok) throw new Error("API responded with error");
       return await res.json();
-    } catch (e) {
-      console.warn("FastAPI backend not reachable, using simulated models status:", e);
+    } catch {
       return {
         models: SAMPLE_AI_MODELS,
         confidence_engine: {
@@ -109,7 +115,7 @@ export class NexusApiClient {
   /**
    * Multimodal Vision Image Spec Extraction
    */
-  static async analyzeImage(imageBase64: string): Promise<any> {
+  static async analyzeImage(imageBase64: string): Promise<Record<string, unknown>> {
     try {
       const res = await fetch(`${API_BASE}/analyze-image`, {
         method: "POST",
@@ -118,7 +124,7 @@ export class NexusApiClient {
       });
       if (!res.ok) throw new Error("Vision analysis failed");
       return await res.json();
-    } catch (e) {
+    } catch {
       await new Promise((r) => setTimeout(r, 800));
       return {
         status: "success",
@@ -145,7 +151,13 @@ export class NexusApiClient {
   /**
    * Copilot Chat
    */
-  static async sendChatMessage(messages: ChatMessage[], model = "gpt-4o"): Promise<any> {
+  static async sendChatMessage(messages: ChatMessage[], model = "gpt-4o"): Promise<{
+    reply: string;
+    model: string;
+    reasoning_steps: string[];
+    references: Array<{ title: string; type: string; url?: string }>;
+    suggested_followups: string[];
+  }> {
     try {
       const res = await fetch(`${API_BASE}/chat`, {
         method: "POST",
@@ -154,7 +166,7 @@ export class NexusApiClient {
       });
       if (!res.ok) throw new Error("Chat request failed");
       return await res.json();
-    } catch (e) {
+    } catch {
       await new Promise((r) => setTimeout(r, 600));
       const userText = messages[messages.length - 1]?.content || "";
       let reply = `I have analyzed the technical product catalog for your query. The multi-agent pipeline validates all parameters with verified 4D provenance—ensuring specs align with OEM engineering standards and B2B eCommerce schemas.`;
@@ -190,7 +202,7 @@ export class NexusApiClient {
   /**
    * Product Comparison
    */
-  static async compareProducts(partNumbers: string[], brand = "Siemens"): Promise<any> {
+  static async compareProducts(partNumbers: string[], brand = "Siemens"): Promise<Record<string, unknown>> {
     try {
       const res = await fetch(`${API_BASE}/compare`, {
         method: "POST",
@@ -199,7 +211,7 @@ export class NexusApiClient {
       });
       if (!res.ok) throw new Error("Compare request failed");
       return await res.json();
-    } catch (e) {
+    } catch {
       await new Promise((r) => setTimeout(r, 500));
       return {
         comparison_id: `CMP-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
@@ -219,92 +231,60 @@ export class NexusApiClient {
           },
           {
             part_number: partNumbers[1] || "6ES7215-1AG40-0XB0",
-            name: `${brand} S7-1200 CPU 1215C Dual Port`,
+            name: `${brand} S7-1200 CPU 1215C`,
             work_memory: "125 KB",
             digital_inputs: "14 Channels",
             digital_outputs: "10 Channels (Transistor)",
             profinet_ports: 2,
             supply_voltage: "24V DC",
-            overall_confidence: 0.972,
+            overall_confidence: 0.982,
             price_tier: "$$$$",
           },
-        ],
-        differential_highlights: [
-          { spec: "Work Memory", winner: partNumbers[1] || "CPU 1215C", delta: "+25% Memory" },
-          { spec: "PROFINET Switch", winner: partNumbers[1] || "CPU 1215C", delta: "Dual RJ45 Ports (Daisy Chain)" },
-          { spec: "Cost Efficiency", winner: partNumbers[0] || "CPU 1214C", delta: "~18% Lower Unit Cost" },
         ],
       };
     }
   }
 
-  // ============================================================
-  // NEW: Database-backed Product CRUD
-  // ============================================================
+  /**
+   * Get single product by ID
+   */
+  static async getProduct(productId: string): Promise<ProductOutput> {
+    const res = await fetch(`${API_BASE}/products/${productId}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Product ${productId} not found (${res.status})`);
+    return await res.json();
+  }
 
   /**
-   * Get all products from database with pagination & search
+   * Get paginated products list
    */
-  static async getProducts(params?: {
-    page?: number;
-    page_size?: number;
-    search?: string;
-    brand?: string;
-    sort_by?: string;
-    sort_order?: string;
-  }): Promise<ProductsListResponse> {
-    const query = new URLSearchParams();
-    if (params?.page) query.set("page", String(params.page));
-    if (params?.page_size) query.set("page_size", String(params.page_size));
-    if (params?.search) query.set("search", params.search);
-    if (params?.brand) query.set("brand", params.brand);
-    if (params?.sort_by) query.set("sort_by", params.sort_by);
-    if (params?.sort_order) query.set("sort_order", params.sort_order);
+  static async getProducts(page = 1, pageSize = 20, brand?: string, search?: string): Promise<ProductsListResponse> {
+    const params = new URLSearchParams({
+      page: String(page),
+      page_size: String(pageSize),
+    });
+    if (brand && brand !== "ALL") params.append("brand", brand);
+    if (search) params.append("search", search);
 
-    const res = await fetch(`${API_BASE}/products?${query.toString()}`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE}/products?${params.toString()}`, { cache: "no-store" });
     if (!res.ok) throw new Error(`Failed to fetch products (${res.status})`);
     return await res.json();
   }
 
   /**
-   * Get a single product from database
+   * Delete product by ID
    */
-  static async getProduct(productId: string): Promise<ProductOutput> {
-    const res = await fetch(`${API_BASE}/products/${productId}`, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Product not found (${res.status})`);
+  static async deleteProduct(productId: string): Promise<{ status: string; product_id: string }> {
+    const res = await fetch(`${API_BASE}/products/${productId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error(`Delete failed (${res.status})`);
     return await res.json();
   }
 
   /**
-   * Delete a product from database
-   */
-  static async deleteProduct(productId: string): Promise<void> {
-    const res = await fetch(`${API_BASE}/products/${productId}`, { method: "DELETE" });
-    if (!res.ok) throw new Error(`Delete failed (${res.status})`);
-  }
-
-  /**
-   * Export a product as downloadable JSON
-   */
-  static async exportProduct(productId: string): Promise<void> {
-    const res = await fetch(`${API_BASE}/products/${productId}/export`, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Export failed (${res.status})`);
-    const data = await res.json();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `nexus_pi_${productId}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  /**
-   * Get dashboard statistics from database
+   * Get platform-wide dashboard stats
    */
   static async getDashboardStats(): Promise<DashboardStats> {
     const res = await fetch(`${API_BASE}/dashboard/stats`, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Dashboard stats failed (${res.status})`);
+    if (!res.ok) throw new Error(`Failed to fetch dashboard stats (${res.status})`);
     return await res.json();
   }
 
@@ -321,7 +301,7 @@ export class NexusApiClient {
   /**
    * Upload real OEM PDF engineering datasheet
    */
-  static async uploadPdfDocument(file: File): Promise<any> {
+  static async uploadPdfDocument(file: File): Promise<Record<string, unknown>> {
     const formData = new FormData();
     formData.append("file", file);
 

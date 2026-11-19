@@ -72,7 +72,7 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
         const dbProduct = await NexusApiClient.getProduct(resolvedParams.id);
         setProduct(dbProduct);
         setActiveProduct(dbProduct);
-      } catch (e: any) {
+      } catch {
         // 3. Fall back to active product if available
         if (activeProduct) {
           setProduct(activeProduct);

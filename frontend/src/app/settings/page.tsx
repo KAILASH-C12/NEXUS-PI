@@ -46,7 +46,7 @@ export default function SettingsPage() {
 
   const [isTesting, setIsTesting] = useState(false);
   const [isBenchmarking, setIsBenchmarking] = useState(false);
-  const [benchmarkResult, setBenchmarkResult] = useState<any | null>(null);
+  const [benchmarkResult, setBenchmarkResult] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
     NexusApiClient.getModelsStatus().then((data) => {

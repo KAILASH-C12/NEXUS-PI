@@ -19,7 +19,7 @@ interface AgentNodeProps {
   name: string;
   role: string;
   model: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   status: "idle" | "active" | "completed";
   color: string;
   tools: string[];

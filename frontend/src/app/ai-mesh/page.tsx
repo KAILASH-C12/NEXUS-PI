@@ -36,9 +36,9 @@ export default function AiMeshStudioPage() {
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
 
-  const [gptOutput, setGptOutput] = useState<any | null>(null);
-  const [claudeOutput, setClaudeOutput] = useState<any | null>(null);
-  const [hfOutput, setHfOutput] = useState<any | null>(null);
+  const [gptOutput, setGptOutput] = useState<Record<string, unknown> | null>(null);
+  const [claudeOutput, setClaudeOutput] = useState<Record<string, unknown> | null>(null);
+  const [hfOutput, setHfOutput] = useState<Record<string, unknown> | null>(null);
   const [isGptRunning, setIsGptRunning] = useState(false);
   const [isClaudeRunning, setIsClaudeRunning] = useState(false);
   const [isHfRunning, setIsHfRunning] = useState(false);

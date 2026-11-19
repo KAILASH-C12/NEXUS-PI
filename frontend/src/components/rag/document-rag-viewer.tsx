@@ -85,9 +85,22 @@ export function DocumentRagViewer() {
 
     setIsUploading(true);
     try {
-      const res = await NexusApiClient.uploadPdfDocument(file);
+      const res = (await NexusApiClient.uploadPdfDocument(file)) as {
+        chunks?: Array<{
+          id: string;
+          source_doc: string;
+          page: number;
+          section: string;
+          similarity_score: number;
+          raw_text: string;
+          extracted_entities?: string[];
+        }>;
+        document_name?: string;
+        total_pages?: number;
+        total_characters?: number;
+      };
       if (res.chunks && res.chunks.length > 0) {
-        const mappedChunks: RAGChunk[] = res.chunks.map((c: any) => ({
+        const mappedChunks: RAGChunk[] = res.chunks.map((c) => ({
           id: c.id,
           sourceDoc: c.source_doc,
           page: c.page,
@@ -99,14 +112,15 @@ export function DocumentRagViewer() {
         setChunks(mappedChunks);
         setSelectedChunk(mappedChunks[0]);
         setUploadedDocMeta({
-          name: res.document_name,
-          pages: res.total_pages,
-          characters: res.total_characters,
+          name: res.document_name || file.name,
+          pages: res.total_pages || 1,
+          characters: res.total_characters || 0,
         });
-        toast.success(`Parsed ${res.total_pages} pages from "${file.name}" with ${mappedChunks.length} vector chunks`);
+        toast.success(`Parsed ${res.total_pages || 1} pages from "${file.name}" with ${mappedChunks.length} vector chunks`);
       }
-    } catch (e: any) {
-      toast.error(`PDF Ingestion error: ${e.message || "Failed to parse"}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Failed to parse";
+      toast.error(`PDF Ingestion error: ${msg}`);
     } finally {
       setIsUploading(false);
     }

@@ -39,7 +39,7 @@ export default function CompareMatrixPage() {
       );
       setAiAnalysis(res.ai_synthesis);
       toast.success("AI Differential Synthesis generated");
-    } catch (e: any) {
+    } catch {
       toast.error("Comparison analysis failed");
     } finally {
       setIsAnalyzing(false);

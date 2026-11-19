@@ -30,9 +30,9 @@ interface AgentDef {
   name: string;
   role: string;
   model: string;
-  icon: any;
-  defaultInput: Record<string, any>;
-  runSimulation: (input: any) => Promise<any>;
+  icon: React.ComponentType<{ className?: string }>;
+  defaultInput: Record<string, unknown>;
+  runSimulation: (input: Record<string, unknown>) => Promise<Record<string, unknown>>;
 }
 
 const AGENT_LABS: AgentDef[] = [
@@ -205,7 +205,7 @@ export default function AgentLabPage() {
     validation: JSON.stringify(AGENT_LABS[5].defaultInput, null, 2),
   });
 
-  const [outputs, setOutputs] = useState<Record<string, any>>({});
+  const [outputs, setOutputs] = useState<Record<string, unknown>>({});
   const [isRunning, setIsRunning] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -224,14 +224,15 @@ export default function AgentLabPage() {
       const result = await activeAgent.runSimulation(parsedInput);
       setOutputs((prev) => ({ ...prev, [activeTab]: result }));
       toast.success(`${activeAgent.name} executed successfully`);
-    } catch (e: any) {
-      toast.error(`Execution error: ${e.message}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(`Execution error: ${msg}`);
     } finally {
       setIsRunning(false);
     }
   };
 
-  const copyOutput = (data: any) => {
+  const copyOutput = (data: unknown) => {
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
     setCopied(true);
     toast.success("Output JSON copied to clipboard");

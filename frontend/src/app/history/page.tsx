@@ -39,24 +39,38 @@ export default function ProductHistoryPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await NexusApiClient.getProducts({
-        page,
-        page_size: 15,
-        search: searchQuery || undefined,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-      });
+      const result = await NexusApiClient.getProducts(page, 15, undefined, searchQuery || undefined);
       setData(result);
-    } catch (e: any) {
-      setError(e.message || "Failed to load products. Is the backend running?");
+    } catch (e: unknown) {
+      const err = e as Error;
+      setError(err.message || "Failed to load products. Is the backend running?");
     } finally {
       setLoading(false);
     }
-  }, [page, searchQuery, sortBy, sortOrder]);
+  }, [page, searchQuery]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    let active = true;
+    async function loadData() {
+      try {
+        const result = await NexusApiClient.getProducts(page, 15, undefined, searchQuery || undefined);
+        if (active) {
+          setData(result);
+          setLoading(false);
+        }
+      } catch (e: unknown) {
+        if (active) {
+          const err = e as Error;
+          setError(err.message || "Failed to load products.");
+          setLoading(false);
+        }
+      }
+    }
+    loadData();
+    return () => {
+      active = false;
+    };
+  }, [page, searchQuery]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,8 +85,9 @@ export default function ProductHistoryPage() {
       await NexusApiClient.deleteProduct(productId);
       toast.success("Product deleted from database");
       fetchProducts();
-    } catch (e: any) {
-      toast.error(`Delete failed: ${e.message}`);
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(`Delete failed: ${err.message}`);
     } finally {
       setDeletingId(null);
     }
@@ -80,10 +95,18 @@ export default function ProductHistoryPage() {
 
   const handleExport = async (productId: string) => {
     try {
-      await NexusApiClient.exportProduct(productId);
+      const prod = await NexusApiClient.getProduct(productId);
+      const blob = new Blob([JSON.stringify(prod, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `product-${productId}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
       toast.success("Product exported as JSON");
-    } catch (e: any) {
-      toast.error(`Export failed: ${e.message}`);
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(`Export failed: ${err.message}`);
     }
   };
 

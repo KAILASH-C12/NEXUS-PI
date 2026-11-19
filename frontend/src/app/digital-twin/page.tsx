@@ -124,7 +124,7 @@ export default function DigitalTwinPage() {
                       key={i}
                       className="w-1 bg-[#ff5500] rounded-full transition-all duration-150"
                       style={{
-                        height: `${Math.max(15, Math.sin((i + Date.now() * 0.005) * 0.8) * 45 + 30)}%`,
+                        height: `${Math.max(15, Math.sin(i * 0.7) * 40 + 45)}%`,
                       }}
                     />
                   ))}

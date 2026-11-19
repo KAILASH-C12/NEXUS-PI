@@ -25,7 +25,7 @@ export function SchematicGeneratorModal({
 }) {
   const [schematicType, setSchematicType] = useState<"EXPLODED_3D" | "WIRING_BLUEPRINT" | "PINOUT_DIAGRAM">("EXPLODED_3D");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [result, setResult] = useState<any | null>(null);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
 
   const handleGenerate = async () => {
     setIsGenerating(true);

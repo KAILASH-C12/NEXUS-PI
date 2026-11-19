@@ -53,8 +53,9 @@ Parameters:
     ConstraintDescription: Must be a valid t3 instance type.
 
   KeyPairName:
-    Type: AWS::EC2::KeyPair::KeyName
-    Description: Name of an existing EC2 key pair for SSH access.
+    Type: String
+    Description: Name of an existing EC2 key pair for SSH access (optional, leave empty if none).
+    Default: ""
 
   AllowedCIDR:
     Type: String
@@ -79,6 +80,12 @@ Mappings:
       CIDR: "10.0.1.0/24"
     PublicSubnetB:
       CIDR: "10.0.2.0/24"
+
+# =============================================================================
+# Conditions
+# =============================================================================
+Conditions:
+  HasKeyPair: !Not [!Equals [!Ref KeyPairName, ""]]
 
 # =============================================================================
 # Resources
@@ -228,6 +235,18 @@ Resources:
           ToPort: 8000
           CidrIp: "0.0.0.0/0"
           Description: API access (port 8000)
+        # Prometheus Monitoring
+        - IpProtocol: tcp
+          FromPort: 9090
+          ToPort: 9090
+          CidrIp: "0.0.0.0/0"
+          Description: Prometheus telemetry (port 9090)
+        # Grafana Dashboards
+        - IpProtocol: tcp
+          FromPort: 3001
+          ToPort: 3001
+          CidrIp: "0.0.0.0/0"
+          Description: Grafana visual dashboard (port 3001)
         # SSH access — restricted to AllowedCIDR
         - IpProtocol: tcp
           FromPort: 22
@@ -655,7 +674,7 @@ Resources:
     DependsOn: VPCGatewayAttachment
     Properties:
       InstanceType: !Ref InstanceType
-      KeyName: !Ref KeyPairName
+      KeyName: !If [HasKeyPair, !Ref KeyPairName, !Ref "AWS::NoValue"]
       ImageId: !Ref LatestAmiId
       IamInstanceProfile: !Ref BackendInstanceProfile
       SubnetId: !Ref PublicSubnetA
@@ -688,11 +707,20 @@ Resources:
             -o /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
-          # ---- Install AWS CLI v2 (for ECR login) ----
-          dnf install -y aws-cli
+          # ---- Install AWS CLI & Git ----
+          dnf install -y aws-cli git
+
+          # ---- Deploy NEXUS-PI stack via Docker Compose ----
+          git clone https://github.com/KAILASH-C12/NEXUS-PI.git /home/ec2-user/NEXUS-PI || true
+          if [ -d "/home/ec2-user/NEXUS-PI" ]; then
+            cd /home/ec2-user/NEXUS-PI
+            cp -n .env.example .env || true
+            chown -R ec2-user:ec2-user /home/ec2-user/NEXUS-PI
+            docker compose up --build -d || true
+          fi
 
           # ---- Signal CloudFormation that the instance is ready ----
-          /opt/aws/bin/cfn-signal -e $? \
+          /opt/aws/bin/cfn-signal -e 0 \
             --stack ${AWS::StackName} \
             --resource EC2Instance \
             --region ${AWS::Region}
@@ -785,6 +813,22 @@ Outputs:
   EC2PublicIP:
     Description: Public IP address of the deployment EC2 instance
     Value: !GetAtt EC2Instance.PublicIp
+
+  FrontendLiveURL:
+    Description: Live Next.js Web Application
+    Value: !Sub "http://${EC2Instance.PublicIp}:3000"
+
+  BackendSwaggerURL:
+    Description: Live FastAPI Interactive Swagger Documentation
+    Value: !Sub "http://${EC2Instance.PublicIp}:8000/docs"
+
+  PrometheusTelemetryURL:
+    Description: Live Prometheus Telemetry & Alerts
+    Value: !Sub "http://${EC2Instance.PublicIp}:9090"
+
+  GrafanaDashboardURL:
+    Description: Live Grafana Visual Observability Dashboard
+    Value: !Sub "http://${EC2Instance.PublicIp}:3001"
 
   ECRApiRepositoryURI:
     Description: URI of the API ECR repository

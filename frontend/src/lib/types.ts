@@ -87,7 +87,7 @@ export interface ProductOutput {
   commerce_content: CommerceContent;
   related_products: RelatedProduct[];
   quality_report: QualityReport;
-  specifications_map?: Record<string, any>;
+  specifications_map?: Record<string, unknown>;
 }
 
 export interface AIModelInfo {

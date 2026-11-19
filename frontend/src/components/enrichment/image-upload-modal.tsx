@@ -40,7 +40,7 @@ export function ImageUploadModal({
   const [activeTab, setActiveTab] = useState<"camera" | "upload" | "presets">("camera");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [extractedPreview, setExtractedPreview] = useState<any | null>(null);
+  const [extractedPreview, setExtractedPreview] = useState<Record<string, unknown> | null>(null);
 
   // Camera stream state
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -66,7 +66,7 @@ export function ImageUploadModal({
         videoRef.current.srcObject = stream;
       }
       setIsCameraActive(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn("Camera access failed:", err);
       setCameraError(
         "Camera permission denied or camera unavailable. You can use sample nameplates or upload an image."
@@ -93,15 +93,43 @@ export function ImageUploadModal({
 
   // Lifecycle when modal opens/closes
   useEffect(() => {
-    if (open && activeTab === "camera") {
-      startCamera();
-    } else {
-      stopCamera();
+    if (!open || activeTab !== "camera") {
+      return;
     }
+    let cancelled = false;
+    let streamRef: MediaStream | null = null;
+
+    navigator.mediaDevices?.getUserMedia({
+      video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false,
+    }).then((stream) => {
+      if (cancelled) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      streamRef = stream;
+      setCameraStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setIsCameraActive(true);
+    }).catch((err: unknown) => {
+      if (!cancelled) {
+        console.warn("Camera access failed:", err);
+        setCameraError(
+          "Camera permission denied or camera unavailable. You can use sample nameplates or upload an image."
+        );
+        setIsCameraActive(false);
+      }
+    });
+
     return () => {
-      stopCamera();
+      cancelled = true;
+      if (streamRef) {
+        (streamRef as MediaStream).getTracks().forEach((t) => t.stop());
+      }
     };
-  }, [open, activeTab]);
+  }, [open, activeTab, facingMode]);
 
   // Capture frame from video and analyze
   const captureAndAnalyze = async () => {
@@ -187,7 +215,7 @@ export function ImageUploadModal({
         </DialogHeader>
 
         {/* 3 High-Contrast Input Tabs */}
-        <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "camera" | "upload" | "samples")} className="w-full space-y-4">
           <TabsList className="bg-slate-100 border border-[#d4d4d8] p-1 grid grid-cols-3 gap-1 rounded-xl h-auto">
             <TabsTrigger
               value="camera"

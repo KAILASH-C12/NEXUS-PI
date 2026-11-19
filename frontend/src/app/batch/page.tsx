@@ -152,8 +152,9 @@ export default function BatchProcessingPage() {
       res.results.forEach((r) => addToHistory(r));
       setProgress(100);
       toast.success(`Batch completed: ${res.total_processed} SKUs enriched with avg confidence ${Math.round(res.average_confidence * 100)}%`);
-    } catch (e: any) {
-      toast.error(`Batch failed: ${e.message}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(`Batch failed: ${msg}`);
     } finally {
       setIsProcessing(false);
     }

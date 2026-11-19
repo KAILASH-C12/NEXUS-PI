@@ -41,10 +41,10 @@ pipeline {
                             if (isUnix()) {
                                 sh 'cp "$SECRET_ENV" .env'
                             } else {
-                                bat 'copy "%SECRET_ENV%" .env /Y'
+                                bat 'copy "%SECRET_ENV%" .env'
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (Exception err) {
                         echo "▸ Info: No Jenkins credential 'nexus-env-file' configured. Checking for local .env..."
                     }
 
@@ -62,44 +62,47 @@ pipeline {
         }
 
         // =====================================================================
-        // Stage 2 — VALIDATE (Shift-Left Quality & Security)
+        // Stage 2 — VALIDATE (Unit Testing & Static Linting)
         // =====================================================================
         stage('Validate') {
             parallel {
 
-                // --- Backend validation (Python / Pytest) -------------------
-                stage('Backend Validate') {
+                stage('Backend Tests') {
                     steps {
                         script {
-                            echo '▸ Installing backend requirements and running Pytest'
+                            echo '▸ Installing Python dependencies and running pytest...'
                             if (isUnix()) {
-                                sh 'python3 -m pip install -r requirements.txt || pip install -r requirements.txt'
-                                sh 'python3 -m pytest tests/ --junitxml=unit-results.xml -v || pytest tests/ --junitxml=unit-results.xml -v'
+                                sh '''
+                                    python3 -m pip install --quiet --upgrade pip
+                                    python3 -m pip install --quiet -r requirements.txt
+                                    pytest --junitxml=junit-backend.xml tests/
+                                '''
                             } else {
-                                bat 'py -m pip install -r requirements.txt || python -m pip install -r requirements.txt'
-                                bat 'py -m pytest tests/ --junitxml=unit-results.xml -v || python -m pytest tests/ --junitxml=unit-results.xml -v'
+                                bat '''
+                                    python -m pip install --quiet --upgrade pip
+                                    python -m pip install --quiet -r requirements.txt
+                                    pytest tests/
+                                '''
                             }
-                        }
-                    }
-                    post {
-                        always {
-                            junit allowEmptyResults: true, testResults: 'unit-results.xml'
                         }
                     }
                 }
 
-                // --- Frontend validation (Next.js & ESLint) -----------------
-                stage('Frontend Validate') {
+                stage('Frontend Lint') {
                     steps {
                         dir('frontend') {
                             script {
-                                echo '▸ Installing frontend dependencies & checking lint'
+                                echo '▸ Installing Node dependencies and validating ESLint rules...'
                                 if (isUnix()) {
-                                    sh 'npm install --prefer-offline --no-audit || true'
-                                    sh 'npm run lint || echo "ESLint check completed"'
+                                    sh '''
+                                        npm install --quiet
+                                        npm run lint
+                                    '''
                                 } else {
-                                    bat 'npm install --prefer-offline --no-audit || echo NPM installed'
-                                    bat 'npm run lint || echo ESLint check completed'
+                                    bat '''
+                                        call npm install --quiet
+                                        call npm run lint
+                                    '''
                                 }
                             }
                         }

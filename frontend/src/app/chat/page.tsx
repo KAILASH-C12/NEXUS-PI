@@ -2,21 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import {
-  MessageSquareCode,
   Send,
   Sparkles,
   Bot,
   User,
-  Cpu,
-  Layers,
-  FileText,
   Copy,
   Check,
   RotateCcw,
-  ChevronDown,
-  ChevronRight,
   Loader2,
-  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,8 +26,6 @@ export default function CopilotChatPage() {
     clearMessages,
     selectedModel,
     setSelectedModel,
-    showReasoning,
-    setShowReasoning,
     isGenerating,
     setIsGenerating,
   } = useChatStore();
@@ -56,7 +47,7 @@ export default function CopilotChatPage() {
     if (!text.trim() || isGenerating) return;
 
     const userMsg: ChatMessage = {
-      id: `user-${Date.now()}`,
+      id: `user-${crypto.randomUUID()}`,
       role: "user",
       content: text.trim(),
       timestamp: new Date().toISOString(),
@@ -71,7 +62,7 @@ export default function CopilotChatPage() {
       const res = await NexusApiClient.sendChatMessage(allMsgs, selectedModel);
 
       const assistantMsg: ChatMessage = {
-        id: `assistant-${Date.now()}`,
+        id: `assistant-${crypto.randomUUID()}`,
         role: "assistant",
         content: res.reply,
         timestamp: new Date().toISOString(),
@@ -82,8 +73,9 @@ export default function CopilotChatPage() {
       };
 
       addMessage(assistantMsg);
-    } catch (e: any) {
-      toast.error(`Copilot error: ${e.message}`);
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(`Copilot error: ${err.message || "Failed to generate reply"}`);
     } finally {
       setIsGenerating(false);
     }

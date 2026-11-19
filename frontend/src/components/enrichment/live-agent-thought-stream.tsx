@@ -11,7 +11,7 @@ interface LogEntry {
   agent: string;
   action: "THOUGHT" | "TOOL_CALL" | "TOOL_RESULT" | "EMIT_STATE";
   message: string;
-  data?: any;
+  data?: unknown;
 }
 
 const DEFAULT_LOGS: LogEntry[] = [

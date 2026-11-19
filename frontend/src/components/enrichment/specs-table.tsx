@@ -37,7 +37,7 @@ export function SpecsTable({
   );
 
   const copyAsJson = () => {
-    const map: Record<string, any> = {};
+    const map: Record<string, unknown> = {};
     specifications.forEach((s) => {
       map[s.attribute_name] = {
         value: s.value,

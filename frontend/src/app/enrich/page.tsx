@@ -63,14 +63,14 @@ function EnrichmentStudioContent() {
     resetStreamEvents,
   } = useEnrichmentStore();
 
+  const [prevQParam, setPrevQParam] = useState(qParam);
+  if (qParam !== prevQParam) {
+    setPrevQParam(qParam);
+    setPartNumber(qParam);
+  }
+
   const [currentStage, setCurrentStage] = useState<string>("COMPLETE");
   const [progress, setProgress] = useState<number>(100);
-
-  useEffect(() => {
-    if (qParam) {
-      setPartNumber(qParam);
-    }
-  }, [qParam]);
 
   const handleStartEnrichment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,8 +109,9 @@ function EnrichmentStudioContent() {
           onClick: () => router.push("/history"),
         },
       });
-    } catch (err: any) {
-      toast.error(`Enrichment error: ${err.message || "Failed"}. Is the backend running on port 8000?`, { duration: 8000 });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed";
+      toast.error(`Enrichment error: ${msg}. Is the backend running on port 8000?`, { duration: 8000 });
 
     } finally {
       setIsStreaming(false);
